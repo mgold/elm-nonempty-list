@@ -1,0 +1,16 @@
+{
+    "version": "1.0.0",
+    "summary": "head and tail without the Maybe",
+    "repository": "https://github.com/mgold/elm-empty-list.git",
+    "license": "BSD3",
+    "source-directories": [
+        "."
+    ],
+    "exposed-modules": [
+        "List.Nonempty"
+    ],
+    "dependencies": {
+        "elm-lang/core": "2.0.1 <= v < 3.0.0"
+    },
+    "elm-version": "0.15.0 <= v < 0.16.0"
+}
