@@ -1,7 +1,7 @@
 {
     "version": "1.0.0",
     "summary": "head and tail without the Maybe",
-    "repository": "https://github.com/mgold/elm-empty-list.git",
+    "repository": "https://github.com/mgold/elm-nonempty-list.git",
     "license": "BSD3",
     "source-directories": [
         "."

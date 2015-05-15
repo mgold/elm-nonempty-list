@@ -5119,7 +5119,7 @@ Elm.List.Nonempty.make = function (_elm) {
          {case "Nonempty":
             return $List.length(_v0._1) + 1;}
          _U.badCase($moduleName,
-         "on line 86, column 26 to 44");
+         "on line 85, column 26 to 44");
       }();
    };
    var isSingleton = function (_v4) {
@@ -5128,7 +5128,7 @@ Elm.List.Nonempty.make = function (_elm) {
          {case "Nonempty":
             return $List.isEmpty(_v4._1);}
          _U.badCase($moduleName,
-         "on line 81, column 31 to 46");
+         "on line 80, column 31 to 46");
       }();
    };
    var toList = function (_v8) {
@@ -5139,7 +5139,7 @@ Elm.List.Nonempty.make = function (_elm) {
               _v8._0,
               _v8._1);}
          _U.badCase($moduleName,
-         "on line 52, column 26 to 31");
+         "on line 51, column 26 to 31");
       }();
    };
    var tail = function (_v12) {
@@ -5148,7 +5148,7 @@ Elm.List.Nonempty.make = function (_elm) {
          {case "Nonempty":
             return _v12._1;}
          _U.badCase($moduleName,
-         "on line 47, column 24 to 26");
+         "on line 46, column 24 to 26");
       }();
    };
    var head = function (_v16) {
@@ -5157,7 +5157,7 @@ Elm.List.Nonempty.make = function (_elm) {
          {case "Nonempty":
             return _v16._0;}
          _U.badCase($moduleName,
-         "on line 42, column 24 to 25");
+         "on line 41, column 24 to 25");
       }();
    };
    var Nonempty = F2(function (a,
@@ -5192,7 +5192,7 @@ Elm.List.Nonempty.make = function (_elm) {
               _v23._0,
               _v23._1));}
          _U.badCase($moduleName,
-         "on line 58, column 26 to 43");
+         "on line 57, column 26 to 43");
       }();
    });
    _op[":::"] = cons;
@@ -5203,7 +5203,7 @@ Elm.List.Nonempty.make = function (_elm) {
          {case "Nonempty":
             return A2(Nonempty,y,_v27._1);}
          _U.badCase($moduleName,
-         "on line 66, column 33 to 46");
+         "on line 65, column 33 to 46");
       }();
    });
    var dropTail = function (_v31) {
@@ -5214,7 +5214,7 @@ Elm.List.Nonempty.make = function (_elm) {
               _v31._0,
               _L.fromArray([]));}
          _U.badCase($moduleName,
-         "on line 71, column 28 to 41");
+         "on line 70, column 28 to 41");
       }();
    };
    var map = F2(function (f,_v35) {
@@ -5225,7 +5225,7 @@ Elm.List.Nonempty.make = function (_elm) {
               f(_v35._0),
               A2($List.map,f,_v35._1));}
          _U.badCase($moduleName,
-         "on line 76, column 25 to 54");
+         "on line 75, column 25 to 54");
       }();
    });
    _elm.List.Nonempty.values = {_op: _op
@@ -17808,6 +17808,26 @@ Elm.Test.make = function (_elm) {
                            _v38._1));}
                       _U.badCase($moduleName,
                       "on line 63, column 21 to 45");
+                   }();
+                }),
+                nonemptylist($Check$Investigator.$int))
+                ,A2($Check.$for,
+                A2($Check.$true,
+                $Check.claim("equality works"),
+                function (_v42) {
+                   return function () {
+                      switch (_v42.ctor)
+                      {case "_Tuple2":
+                         return _U.eq(A2($List$Nonempty.Nonempty,
+                           _v42._0,
+                           _v42._1),
+                           A2($List$Nonempty.map,
+                           $Basics.identity,
+                           A2($List$Nonempty.Nonempty,
+                           _v42._0,
+                           _v42._1)));}
+                      _U.badCase($moduleName,
+                      "on line 69, column 21 to 74");
                    }();
                 }),
                 nonemptylist($Check$Investigator.$int))]));

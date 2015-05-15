@@ -12,11 +12,11 @@ module List.Nonempty where
 @docs head, tail, toList
 
 # Inspect
+Nonempty lists support equality with the usual `(==)` operator.
 @docs isSingleton, length
 
 # Convert
 @docs cons, replaceHead, dropTail, map
-
 
 -}
 
@@ -70,12 +70,12 @@ replaceHead y (Nonempty x xs) = Nonempty y xs
 dropTail : Nonempty a -> Nonempty a
 dropTail (Nonempty x xs) = Nonempty x []
 
-{-| Map a function over the nonempty list
+{-| Map a function over the nonempty list.
 -}
 map : (a -> b) -> Nonempty a -> Nonempty b
 map f (Nonempty x xs) = Nonempty (f x) (List.map f xs)
 
-{-| Determine if the nonempty list has exactly one element
+{-| Determine if the nonempty list has exactly one element.
 -}
 isSingleton : Nonempty a -> Bool
 isSingleton (Nonempty x xs) = List.isEmpty xs

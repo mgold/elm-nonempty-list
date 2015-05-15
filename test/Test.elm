@@ -63,6 +63,12 @@ testSuite =
         (\(x,xs) -> x::xs |> List.map ((*) 2))
       `for`
         nonemptylist int
+    , claim
+        "equality works"
+     `true`
+        (\(x,xs) -> NE.Nonempty x xs == NE.map identity (NE.Nonempty x xs))
+      `for`
+        nonemptylist int
     ]
 
 result = quickCheck testSuite
