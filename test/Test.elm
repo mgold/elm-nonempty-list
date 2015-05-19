@@ -69,6 +69,22 @@ testSuite =
         (\(x,xs) -> NE.Nonempty x xs == NE.map identity (NE.Nonempty x xs))
       `for`
         nonemptylist int
+    , claim
+        "popping reduces the length by 1 except for singleton lists"
+     `true`
+        (\(x,xs) -> let ys = NE.Nonempty x xs
+                        lengthReduced = (NE.length ys) - 1 == NE.length (NE.pop ys)
+                    in lengthReduced || NE.isSingleton ys)
+      `for`
+        nonemptylist int
+    , claim
+        "pop xs == tail xs except for singleton lists"
+     `true`
+        (\(x,xs) -> let ys = NE.Nonempty x xs
+                        tailEquals = NE.toList (NE.pop ys) == xs
+                    in tailEquals || NE.isSingleton ys)
+      `for`
+        nonemptylist int
     ]
 
 result = quickCheck testSuite
