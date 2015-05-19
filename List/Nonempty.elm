@@ -1,6 +1,6 @@
 module List.Nonempty where
 
-{-| A list that cannot be empty.
+{-| A list that cannot be empty. The head and tail can be accessed without Maybes.
 
 # Definition
 @docs Nonempty
@@ -16,7 +16,7 @@ Nonempty lists support equality with the usual `(==)` operator.
 @docs isSingleton, length
 
 # Convert
-@docs cons, replaceHead, dropTail, map
+@docs cons, pop, replaceHead, dropTail, map
 
 -}
 
@@ -51,14 +51,20 @@ tail (Nonempty x xs) = xs
 toList : Nonempty a -> List a
 toList (Nonempty x xs) = x::xs
 
-{-| Add another element to the head of the list. Also available infix as `(:::)`; be sure to add `exposing ((:::))` to
-your import.
--}
+{-| Add another element as the head of the list. Also available infix as
+`(:::)`; be sure to add `exposing ((:::))` to your import. -}
 cons : a -> Nonempty a -> Nonempty a
 cons y (Nonempty x xs) = Nonempty y (x::xs)
 
 (:::) = cons
 infixr 5 :::
+
+{-| Pop and discard the head, or do nothing for a singleton list. Useful if you
+want to exhaust a list but hang on to the last item indefinitely. -}
+pop : Nonempty a -> Nonempty a
+pop (Nonempty x xs) = case xs of
+    [] -> Nonempty x xs
+    y::ys -> Nonempty y ys
 
 {-| Exchange the head element while leaving the tail alone.
 -}
