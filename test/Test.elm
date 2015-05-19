@@ -85,6 +85,24 @@ testSuite =
                     in tailEquals || NE.isSingleton ys)
       `for`
         nonemptylist int
+    , claim
+        "reversing twice is the identity"
+     `that`
+        (\(x,xs) -> let ys = NE.Nonempty x xs
+                    in NE.reverse (NE.reverse ys))
+      `is`
+        (\(x,xs) -> NE.Nonempty x xs)
+      `for`
+        nonemptylist int
+    , claim
+        "reversing is equal to the ordinary list reverse"
+     `that`
+        (\(x,xs) -> let ys = NE.Nonempty x xs
+                    in NE.reverse ys |> NE.toList)
+      `is`
+        (\(x,xs) -> List.reverse (x::xs))
+      `for`
+        nonemptylist int
     ]
 
 result = quickCheck testSuite

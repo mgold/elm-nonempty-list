@@ -16,7 +16,7 @@ Nonempty lists support equality with the usual `(==)` operator.
 @docs isSingleton, length
 
 # Convert
-@docs cons, pop, replaceHead, dropTail, map
+@docs cons, pop, reverse, replaceHead, dropTail, map, map2
 
 -}
 
@@ -66,6 +66,16 @@ pop (Nonempty x xs) = case xs of
     [] -> Nonempty x xs
     y::ys -> Nonempty y ys
 
+{-| Reverse a nonempty list.
+-}
+reverse : Nonempty a -> Nonempty a
+reverse (Nonempty x xs) =
+    let revapp : (List a, a, List a) -> Nonempty a
+        revapp (ls, c, rs) = case rs of
+            [] -> Nonempty c ls
+            r::rs' -> revapp (c::ls, r, rs')
+    in revapp ([], x, xs)
+
 {-| Exchange the head element while leaving the tail alone.
 -}
 replaceHead : a -> Nonempty a -> Nonempty a
@@ -76,10 +86,15 @@ replaceHead y (Nonempty x xs) = Nonempty y xs
 dropTail : Nonempty a -> Nonempty a
 dropTail (Nonempty x xs) = Nonempty x []
 
-{-| Map a function over the nonempty list.
+{-| Map a function over a nonempty list.
 -}
 map : (a -> b) -> Nonempty a -> Nonempty b
 map f (Nonempty x xs) = Nonempty (f x) (List.map f xs)
+
+{-| Map a function over two nonempty lists.
+-}
+map2 : (a -> b -> c) -> Nonempty a -> Nonempty b -> Nonempty c
+map2 f (Nonempty x xs) (Nonempty y ys) = Nonempty (f x y) (List.map2 f xs ys)
 
 {-| Determine if the nonempty list has exactly one element.
 -}
