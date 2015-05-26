@@ -8,7 +8,7 @@ module List.Nonempty where
 # Create
 @docs fromElement, fromList
 
-# Retrieve values
+# Access
 @docs head, tail, toList
 
 # Inspect
@@ -16,11 +16,18 @@ Nonempty lists support equality with the usual `(==)` operator.
 @docs isSingleton, length
 
 # Convert
-@docs cons, pop, reverse, replaceHead, replaceTail, dropTail, map, map2
+@docs cons, pop, reverse, concat
+
+# Swap
+@docs replaceHead, replaceTail, dropTail
+
+# Map
+@docs map, map2
 
 -}
 
-{-| The Nonempty type. Unless you have both a head and tail, you'll normally use the provided interface.
+{-| The Nonempty type. If you have both a head and tail, you can construct a
+nonempty list directly. Usually you'll use one of the many helpers below instead.
 -}
 type Nonempty a = Nonempty a (List a)
 
@@ -75,6 +82,14 @@ reverse (Nonempty x xs) =
             [] -> Nonempty c ls
             r::rs' -> revapp (c::ls, r, rs')
     in revapp ([], x, xs)
+
+{-| Flatten a nonempty list of nonempty lists into a single nonempty list.
+-}
+concat : Nonempty (Nonempty a) -> Nonempty a
+concat (Nonempty xs xss) =
+    let hd = head xs
+        tl = tail xs ++ List.concat (List.map toList xss)
+    in Nonempty hd tl
 
 {-| Exchange the head element while leaving the tail alone.
 -}

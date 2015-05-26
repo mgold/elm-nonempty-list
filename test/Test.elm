@@ -112,6 +112,18 @@ testSuite =
         (\(ys, x, xs) -> x::ys)
       `for`
         tuple3 (list int, int, list int)
+    , claim
+        "concat is equal to doing so with an ordinary list"
+     `that`
+        (\((x, xs), ys) ->
+            let zs : NE.Nonempty (NE.Nonempty Int)
+                zs = NE.Nonempty (NE.Nonempty x xs) (List.map (uncurry NE.Nonempty) ys)
+            in NE.concat zs |> NE.toList)
+      `is`
+        (\((x, xs), ys) -> let ys' = List.map (uncurry (::)) ys
+                           in List.concat ((x::xs)::ys'))
+      `for`
+        nonemptylist (nonemptylist int)
     ]
 
 result = quickCheck testSuite
