@@ -16,7 +16,7 @@ Nonempty lists support equality with the usual `(==)` operator.
 @docs isSingleton, length
 
 # Convert
-@docs cons, pop, reverse, replaceHead, dropTail, map, map2
+@docs cons, pop, reverse, replaceHead, replaceTail, dropTail, map, map2
 
 -}
 
@@ -80,6 +80,11 @@ reverse (Nonempty x xs) =
 -}
 replaceHead : a -> Nonempty a -> Nonempty a
 replaceHead y (Nonempty x xs) = Nonempty y xs
+
+{-| Exchange the tail for another while leaving the head alone.
+-}
+replaceTail : List a -> Nonempty a -> Nonempty a
+replaceTail ys (Nonempty x xs) = Nonempty x ys
 
 {-| Replace the tail with the empty list while leaving the head alone.
 -}

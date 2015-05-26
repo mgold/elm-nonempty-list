@@ -103,6 +103,15 @@ testSuite =
         (\(x,xs) -> List.reverse (x::xs))
       `for`
         nonemptylist int
+    , claim
+        "replaceTail is equal to doing so with an ordinary list"
+     `that`
+        (\(ys, x, xs) -> let zs = NE.Nonempty x xs
+                    in NE.replaceTail ys zs |> NE.toList)
+      `is`
+        (\(ys, x, xs) -> x::ys)
+      `for`
+        tuple3 (list int, int, list int)
     ]
 
 result = quickCheck testSuite
