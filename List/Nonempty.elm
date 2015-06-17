@@ -126,3 +126,15 @@ isSingleton (Nonempty x xs) = List.isEmpty xs
 length : Nonempty a -> Int
 length (Nonempty x xs) = List.length xs + 1
 
+{-| Remove adjacent duplicate elements from the nonempty list. The elements must support equality or you will get a
+runtime error. -}
+deduplicate : Nonempty a -> Nonempty a
+deduplicate (Nonempty x xs) =
+    let dedupe : a -> List a -> List a -> Nonempty a
+        dedupe prev done next = case next of
+            [] -> Nonempty prev done
+            y::ys -> if y == prev
+                     then dedupe prev done ys
+                     else dedupe y (prev::done) ys
+    in reverse <| dedupe x [] xs
+

@@ -1,9 +1,13 @@
 module Test where
 {-| -}
 
+import Graphics.Element exposing (above)
+import Html
 import Check exposing (..)
 import Check.Investigator exposing (..)
 import Check.Runner.Browser exposing (..)
+import ElmTest.Test exposing (equals)
+import ElmTest.Runner.Element exposing (runDisplay)
 import List.Nonempty as NE exposing ((:::))
 
 nonemptylist elem = tuple (elem, list elem)
@@ -126,6 +130,18 @@ testSuite =
         nonemptylist (nonemptylist int)
     ]
 
+dedupeSuite =
+    let mk x xs = NE.Nonempty x xs |> NE.deduplicate |> NE.toList
+    in ElmTest.Test.suite "deduplication"
+        [ [1] `equals` mk 1 []
+        , [1, 2] `equals` mk 1 [2]
+        , [1, 2] `equals` mk 1 [2, 2]
+        , [1, 2] `equals` mk 1 [1, 2]
+        , [1, 2, 1] `equals` mk 1 [1, 2, 2, 1]
+        , [1, 2, 1] `equals` mk 1 [1, 2, 2, 2, 2, 2, 1]
+        , [1, 2, 3, 4, 5] `equals` mk 1 [1, 2, 2, 3, 4, 4, 5]
+        ]
+
 result = quickCheck testSuite
 
-main = display result
+main = Html.div [] [display result, Html.fromElement (runDisplay dedupeSuite)]
