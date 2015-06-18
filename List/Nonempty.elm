@@ -13,7 +13,7 @@ module List.Nonempty where
 
 # Inspect
 Nonempty lists support equality with the usual `(==)` operator.
-@docs isSingleton, length
+@docs isSingleton, length, member
 
 # Convert
 @docs cons, pop, reverse, concat
@@ -129,6 +129,11 @@ isSingleton (Nonempty x xs) = List.isEmpty xs
 -}
 length : Nonempty a -> Int
 length (Nonempty x xs) = List.length xs + 1
+
+{- Determine is an element is present in the nonempty list.
+-}
+member : a -> Nonempty a -> Bool
+member y (Nonempty x xs) = x == y || List.member y xs
 
 {-| Remove _adjacent_ duplicate elements from the nonempty list. For example, `1,2,2,1` becomes `1,2,1`.
 -}

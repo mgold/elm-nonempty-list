@@ -128,6 +128,15 @@ testSuite =
                            in List.concat ((x::xs)::ys'))
       `for`
         nonemptylist (nonemptylist int)
+    , claim
+        "member checks the head and the tail"
+     `that`
+        (\(x, xs, y) -> let zs = NE.Nonempty x xs
+                    in NE.member y zs)
+      `is`
+        (\(x, xs, y) -> x == y || List.member y xs)
+      `for`
+        tuple3 (int, list int, int)
     ]
 
 dedupeSuite =
