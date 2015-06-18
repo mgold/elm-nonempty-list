@@ -21,6 +21,10 @@ Nonempty lists support equality with the usual `(==)` operator.
 # Swap
 @docs replaceHead, replaceTail, dropTail
 
+# Fold
+To fold from the right, reverse the list first.
+@docs foldl, foldl1
+
 # Map
 @docs map, map2
 
@@ -44,7 +48,7 @@ fromElement x = Nonempty x []
 -}
 fromList : List a -> Maybe (Nonempty a)
 fromList ys = case ys of
-    (x::xs) -> Just (Nonempty x xs)
+    x::xs -> Just (Nonempty x xs)
     _ -> Nothing
 
 {-| Return the head of the list.
@@ -63,7 +67,8 @@ toList : Nonempty a -> List a
 toList (Nonempty x xs) = x::xs
 
 {-| Add another element as the head of the list. Also available infix as
-`(:::)`; be sure to add `exposing ((:::))` to your import. -}
+`(:::)`; be sure to add `exposing ((:::))` to your import.
+-}
 cons : a -> Nonempty a -> Nonempty a
 cons y (Nonempty x xs) = Nonempty y (x::xs)
 
@@ -71,7 +76,8 @@ cons y (Nonempty x xs) = Nonempty y (x::xs)
 infixr 5 :::
 
 {-| Pop and discard the head, or do nothing for a singleton list. Useful if you
-want to exhaust a list but hang on to the last item indefinitely. -}
+want to exhaust a list but hang on to the last item indefinitely.
+-}
 pop : Nonempty a -> Nonempty a
 pop (Nonempty x xs) = case xs of
     [] -> Nonempty x xs
@@ -158,3 +164,21 @@ uniq (Nonempty x xs) =
                      then unique seen done ys
                      else unique (y::seen) (y:::done) ys
     in reverse <| unique [x] (Nonempty x []) xs
+
+{-| Reduce a nonempty list from the left with a base case.
+
+    foldl (++) "" (Nonempty "a" ["b", "c"]) == "cba"
+-}
+foldl : (a -> b -> b) -> b -> Nonempty a -> b
+foldl f b (Nonempty x xs) = List.foldl f b (x::xs)
+
+{-| Reduce a nonempty list from the left _without_ a base case. As per Elm convention, the first argument is the current
+element and the second argument is the accumulated value. The function is first invoked on the _second_ element, using
+the first element as the accumulated value, except for singleton lists in which has the head is returned.
+
+    foldl1 (++) (Nonempty "a" ["b", "c"]) == "cba"
+    foldl1 (++) (fromElement "a") == "a"
+-}
+foldl1 : (a -> a -> a) -> Nonempty a -> a
+foldl1 f (Nonempty x xs) = List.foldl f x xs
+

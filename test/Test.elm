@@ -9,6 +9,7 @@ import Check.Runner.Browser exposing (..)
 import ElmTest.Test exposing (equals)
 import ElmTest.Runner.Element exposing (runDisplay)
 import List.Nonempty as NE exposing ((:::))
+import Debug
 
 nonemptylist elem = tuple (elem, list elem)
 
@@ -137,6 +138,24 @@ testSuite =
         (\(x, xs, y) -> x == y || List.member y xs)
       `for`
         tuple3 (int, list int, int)
+    , claim
+        "foldl is the same as for a list"
+     `that`
+        (\(x,xs) -> let ys = NE.Nonempty x xs
+                    in NE.foldl (++) "" ys)
+      `is`
+        (\(x,xs) -> List.foldl (++) "" (x::xs))
+      `for`
+        nonemptylist string
+    , claim
+        "foldl1 is the same as for a list"
+     `that`
+        (\(x,xs) -> let ys = NE.Nonempty x xs
+                    in NE.foldl1 (++) ys)
+      `is`
+        (\(x,xs) -> List.foldl (++) "" (x::xs))
+      `for`
+        nonemptylist string
     ]
 
 dedupeSuite =
