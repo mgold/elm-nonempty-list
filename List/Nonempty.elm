@@ -24,6 +24,10 @@ Nonempty lists support equality with the usual `(==)` operator.
 # Map
 @docs map, map2
 
+# Deduplicate
+The elements must support equality or you will get a runtime error.
+@docs dedup, uniq
+
 -}
 
 {-| The Nonempty type. If you have both a head and tail, you can construct a
@@ -126,10 +130,10 @@ isSingleton (Nonempty x xs) = List.isEmpty xs
 length : Nonempty a -> Int
 length (Nonempty x xs) = List.length xs + 1
 
-{-| Remove adjacent duplicate elements from the nonempty list. The elements must support equality or you will get a
-runtime error. -}
-deduplicate : Nonempty a -> Nonempty a
-deduplicate (Nonempty x xs) =
+{-| Remove _adjacent_ duplicate elements from the nonempty list. For example, `1,2,2,1` becomes `1,2,1`.
+-}
+dedup : Nonempty a -> Nonempty a
+dedup (Nonempty x xs) =
     let dedupe : a -> List a -> List a -> Nonempty a
         dedupe prev done next = case next of
             [] -> Nonempty prev done
@@ -138,3 +142,14 @@ deduplicate (Nonempty x xs) =
                      else dedupe y (prev::done) ys
     in reverse <| dedupe x [] xs
 
+{-| Remove _all_ duplicate elements from the nonempty list, with the remaining elements ordered by first occurrence. For example, `1,2,2,1` becomes `1,2`.
+-}
+uniq : Nonempty a -> Nonempty a
+uniq (Nonempty x xs) =
+    let unique : List a -> Nonempty a -> List a -> Nonempty a
+        unique seen done next = case next of
+            [] -> done
+            y::ys -> if List.member y seen
+                     then unique seen done ys
+                     else unique (y::seen) (y:::done) ys
+    in reverse <| unique [x] (Nonempty x []) xs

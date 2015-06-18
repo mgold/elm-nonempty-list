@@ -131,7 +131,7 @@ testSuite =
     ]
 
 dedupeSuite =
-    let mk x xs = NE.Nonempty x xs |> NE.deduplicate |> NE.toList
+    let mk x xs = NE.Nonempty x xs |> NE.dedup |> NE.toList
     in ElmTest.Test.suite "deduplication"
         [ [1] `equals` mk 1 []
         , [1, 2] `equals` mk 1 [2]
@@ -140,8 +140,28 @@ dedupeSuite =
         , [1, 2, 1] `equals` mk 1 [1, 2, 2, 1]
         , [1, 2, 1] `equals` mk 1 [1, 2, 2, 2, 2, 2, 1]
         , [1, 2, 3, 4, 5] `equals` mk 1 [1, 2, 2, 3, 4, 4, 5]
+        , [1, 2, 3, 2, 1] `equals` mk 1 [1, 2, 2, 3, 2, 2, 1, 1]
+        , [1..4] `equals` mk 1 [1..4]
+        , [3, 1, 2, 3] `equals` mk 3 [1..3]
         ]
+uniqSuite =
+    let mk x xs = NE.Nonempty x xs |> NE.uniq |> NE.toList
+    in ElmTest.Test.suite "uniq"
+        [ [1] `equals` mk 1 []
+        , [1, 2] `equals` mk 1 [2]
+        , [1, 2] `equals` mk 1 [2, 2]
+        , [1, 2] `equals` mk 1 [1, 2]
+        , [1, 2] `equals` mk 1 [1, 2, 2, 1]
+        , [1, 2] `equals` mk 1 [1, 2, 2, 2, 2, 2, 1]
+        , [1, 2, 3, 4, 5] `equals` mk 1 [1, 2, 2, 3, 4, 4, 5]
+        , [1, 2, 3] `equals` mk 1 [1, 2, 2, 3, 2, 2, 1, 1]
+        , [1..4] `equals` mk 1 [1..4]
+        , [3, 1, 2] `equals` mk 3 [1..3]
+        ]
+
+unitSuite = ElmTest.Test.suite "all unit tests"
+    [dedupeSuite, uniqSuite]
 
 result = quickCheck testSuite
 
-main = Html.div [] [display result, Html.fromElement (runDisplay dedupeSuite)]
+main = Html.div [] [display result, Html.fromElement (runDisplay unitSuite)]
