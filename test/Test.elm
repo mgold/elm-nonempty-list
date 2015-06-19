@@ -10,6 +10,7 @@ import ElmTest.Test exposing (equals)
 import ElmTest.Runner.Element exposing (runDisplay)
 import List.Nonempty as NE exposing ((:::))
 import Debug
+import String
 
 nonemptylist elem = tuple (elem, list elem)
 
@@ -156,6 +157,80 @@ testSuite =
         (\(x,xs) -> List.foldl (++) "" (x::xs))
       `for`
         nonemptylist string
+    , suite "scanning"
+        [ claim
+            "scanl is the same as for a list"
+         `that`
+            (\(x,xs) -> let ys = NE.Nonempty x xs
+                        in NE.scanl (++) "" ys |> NE.toList)
+          `is`
+            (\(x,xs) -> List.scanl (++) "" (x::xs))
+          `for`
+            nonemptylist string
+        , claim
+            "The head of the result of scanl is the base case"
+         `that`
+            (\(x,xs) -> let ys = NE.Nonempty x xs
+                            scanned = NE.scanl (++) "" ys
+                        in NE.head scanned)
+          `is`
+            (\(x,xs) -> "")
+          `for`
+            nonemptylist string
+        , claim
+            "The tail of the result of scanl is the result of scanl1"
+         `that`
+            (\(x,xs) -> let ys = NE.Nonempty x xs
+                            scanned = NE.scanl (++) "" ys
+                        in NE.tail scanned)
+          `is`
+            (\(x,xs) -> let ys = NE.Nonempty x xs
+                            scanned = NE.scanl1 (++) ys
+                        in NE.toList scanned)
+          `for`
+            nonemptylist string
+        , claim
+            "scanl adds 1 to the length"
+         `that`
+            (\(x,xs) -> let ys = NE.Nonempty x xs
+                            scanned = NE.scanl (+) 0 ys
+                        in NE.length scanned)
+          `is`
+            (\(x,xs) -> 2 + List.length xs)
+          `for`
+            nonemptylist int
+        , claim
+            "scanl1 does not change the length"
+         `that`
+            (\(x,xs) -> let ys = NE.Nonempty x xs
+                            scanned = NE.scanl1 (+) ys
+                        in NE.length scanned)
+          `is`
+            (\(x,xs) -> 1 + List.length xs)
+          `for`
+            nonemptylist int
+        , claim
+            "scanl with string concatenation never decreases the length"
+         `true`
+            (\(x,xs) -> let ys = NE.Nonempty x xs
+                            scanned = NE.scanl1 (++) ys
+                            counts = NE.map String.length scanned
+                            countPairs = List.map2 (,) (NE.toList counts) (NE.tail counts)
+                            bools = List.map (\(a,b) -> a <= b) countPairs
+                        in List.all identity bools)
+          `for`
+            nonemptylist string
+        , claim
+            "scanl1 does not change the head"
+         `that`
+            (\(x,xs) -> let ys = NE.Nonempty x xs
+                            scanned = NE.scanl1 (++) ys
+                        in NE.head scanned)
+          `is`
+            (\(x,xs) -> x)
+          `for`
+            nonemptylist string
+        ]
     ]
 
 dedupeSuite =

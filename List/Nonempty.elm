@@ -1,6 +1,7 @@
 module List.Nonempty where
 
-{-| A list that cannot be empty. The head and tail can be accessed without Maybes.
+{-| A list that cannot be empty. The head and tail can be accessed without Maybes. Most other list functions are
+available.
 
 # Definition
 @docs Nonempty
@@ -22,8 +23,8 @@ Nonempty lists support equality with the usual `(==)` operator.
 @docs replaceHead, replaceTail, dropTail
 
 # Fold
-To fold from the right, reverse the list first.
-@docs foldl, foldl1
+To fold or scan from the right, reverse the list first.
+@docs foldl, foldl1, scanl, scanl1
 
 # Map
 @docs map, map2
@@ -181,4 +182,18 @@ the first element as the accumulated value, except for singleton lists in which 
 -}
 foldl1 : (a -> a -> a) -> Nonempty a -> a
 foldl1 f (Nonempty x xs) = List.foldl f x xs
+
+{-| Like `foldl`, but keep each intermediate value. For example, scan addition to create the cumulative sum up to each
+element. The head of the new nonempty list is always the base case provided, and the length increases by 1.
+-}
+scanl : (a -> b -> b) -> b -> Nonempty a -> Nonempty b
+scanl f b (Nonempty x xs) = Nonempty b <| List.scanl f (f x b) xs
+
+{-| Like `foldl1`, but keep each intermediate value. The head and length are not changed.
+-}
+scanl1 : (a -> a -> a) -> Nonempty a -> Nonempty a
+scanl1 f (Nonempty x xs) =
+    case xs of
+        [] -> Nonempty x []
+        y::ys -> Nonempty x (List.scanl f (f y x) ys)
 
