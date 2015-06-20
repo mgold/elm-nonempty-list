@@ -22,15 +22,15 @@ Nonempty lists support equality with the usual `(==)` operator.
 # Swap
 @docs replaceHead, replaceTail, dropTail
 
+# Map
+@docs map, map2
+
 # Fold
 To fold or scan from the right, reverse the list first.
 @docs foldl, foldl1, scanl, scanl1
 
-# Map
-@docs map, map2
-
 # Deduplicate
-The elements must support equality or you will get a runtime error.
+The nonempty list's elements must support equality (e.g. not functions or signals). Otherwise  you will get a runtime error.
 @docs dedup, uniq
 
 -}
@@ -142,7 +142,7 @@ isSingleton (Nonempty x xs) = List.isEmpty xs
 length : Nonempty a -> Int
 length (Nonempty x xs) = List.length xs + 1
 
-{- Determine is an element is present in the nonempty list.
+{-| Determine if an element is present in the nonempty list.
 -}
 member : a -> Nonempty a -> Bool
 member y (Nonempty x xs) = x == y || List.member y xs
