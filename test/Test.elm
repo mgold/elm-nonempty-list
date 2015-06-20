@@ -53,6 +53,26 @@ testSuite =
      `for`
        int
     , claim
+        "append works"
+     `that`
+        (\((x,xs), (y,ys)) ->
+            let xz = (NE.Nonempty x xs)
+                yz = (NE.Nonempty y ys)
+            in NE.toList <| xz `NE.append` yz)
+     `is`
+        (\((x,xs), (y,ys)) -> x :: xs ++ y :: ys)
+      `for`
+        tuple (nonemptylist int, nonemptylist int)
+    , claim
+        "append never results in a singleton"
+     `false`
+       (\((x,xs), (y,ys)) ->
+           let xz = (NE.Nonempty x xs)
+               yz = (NE.Nonempty y ys)
+           in NE.isSingleton <| xz `NE.append` yz)
+     `for`
+       tuple (nonemptylist int, nonemptylist int)
+    , claim
         "fromList fails only for the empty List"
      `true`
        (\xs -> case NE.fromList xs of

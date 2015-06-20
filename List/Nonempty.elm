@@ -17,7 +17,7 @@ Nonempty lists support equality with the usual `(==)` operator.
 @docs isSingleton, length, member
 
 # Convert
-@docs cons, pop, reverse, concat
+@docs cons, append, pop, reverse, concat
 
 # Swap
 @docs replaceHead, replaceTail, dropTail
@@ -75,6 +75,11 @@ cons y (Nonempty x xs) = Nonempty y (x::xs)
 
 (:::) = cons
 infixr 5 :::
+
+{-| Append two nonempty lists together. `(++)` is _not_ supported.
+-}
+append : Nonempty a -> Nonempty a -> Nonempty a
+append (Nonempty x xs) (Nonempty y ys) = Nonempty x (xs ++ y :: ys)
 
 {-| Pop and discard the head, or do nothing for a singleton list. Useful if you
 want to exhaust a list but hang on to the last item indefinitely.
