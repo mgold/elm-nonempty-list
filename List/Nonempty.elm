@@ -25,6 +25,9 @@ Nonempty lists support equality with the usual `(==)` operator.
 # Map
 @docs map, map2
 
+# Filter
+@docs filter
+
 # Fold
 To fold or scan from the right, reverse the list first.
 @docs foldl, foldl1, scanl, scanl1
@@ -146,6 +149,21 @@ length (Nonempty x xs) = List.length xs + 1
 -}
 member : a -> Nonempty a -> Bool
 member y (Nonempty x xs) = x == y || List.member y xs
+
+{-| Filter a nonempty list. If all values are filtered out, return the singleton list containing the default value
+provided. If any value is retained, the default value is not used. If you want to deal with a Maybe instead, use
+`toList >> List.filter yourPredicate >> fromList`.
+
+    filter isEven 0 (Nonempty 7 [2, 5]) == fromElement 2
+    filter isEven 0 (Nonempty 7 []) == fromElement 0
+
+-}
+filter : (a -> Bool) -> a -> Nonempty a -> Nonempty a
+filter p d (Nonempty x xs) =
+    if p x then Nonempty x (List.filter p xs)
+    else case (List.filter p xs) of
+        [] -> Nonempty d []
+        y::ys -> Nonempty y ys
 
 {-| Remove _adjacent_ duplicate elements from the nonempty list. For example, `1,2,2,1` becomes `1,2,1`.
 -}

@@ -14,6 +14,8 @@ import String
 
 nonemptylist elem = tuple (elem, list elem)
 
+isEven n = n % 2 == 0
+
 testSuite =
     suite "Nonempty List Test Suite"
     [ claim
@@ -90,11 +92,42 @@ testSuite =
       `for`
         nonemptylist int
     , claim
-        "equality works"
+        "filter works"
+     `that`
+        (\(x,xs) -> NE.Nonempty x xs |> NE.filter isEven -99 |> NE.toList)
+     `is`
+        (\(x,xs) -> let filtered = List.filter isEven (x::xs)
+                    in if List.isEmpty filtered then [-99] else filtered)
+      `for`
+        nonemptylist int
+    , claim
+        "Filtering everything out results in the default value"
+     `that`
+        (\((x,xs), d) -> NE.Nonempty x xs |> NE.filter (always False) d |> NE.toList)
+     `is`
+        (\((x,xs), d) -> [d])
+      `for`
+        tuple (nonemptylist int, int)
+    , claim
+        "Filtering nothing out is the identity"
+     `that`
+        (\((x,xs), d) -> NE.Nonempty x xs |> NE.filter (always True) d)
+     `is`
+        (\((x,xs), d) -> NE.Nonempty x xs)
+      `for`
+        tuple (nonemptylist int, int)
+    , claim
+        "Equal lists equate true"
      `true`
         (\(x,xs) -> NE.Nonempty x xs == NE.map identity (NE.Nonempty x xs))
       `for`
         nonemptylist int
+    , claim
+        "Unequal lists equate false"
+     `false`
+        (\((x,xs), d) -> NE.Nonempty x xs == d ::: NE.Nonempty x xs)
+      `for`
+        tuple (nonemptylist int, int)
     , claim
         "popping reduces the length by 1 except for singleton lists"
      `true`
