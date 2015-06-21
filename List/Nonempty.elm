@@ -202,6 +202,11 @@ the first element as the accumulated value, except for singleton lists in which 
 
     foldl1 (++) (Nonempty "a" ["b", "c"]) == "cba"
     foldl1 (++) (fromElement "a") == "a"
+
+    findMe = 42
+    minimizeMe n = abs (n-findMe)
+    nearest = foldl1 (\a b -> if minimizeMe a < minimizeMe b then a else b) (Nonempty 10 [20,30,40,50,60])
+    nearest == 40
 -}
 foldl1 : (a -> a -> a) -> Nonempty a -> a
 foldl1 f (Nonempty x xs) = List.foldl f x xs
@@ -213,6 +218,13 @@ scanl : (a -> b -> b) -> b -> Nonempty a -> Nonempty b
 scanl f b (Nonempty x xs) = Nonempty b <| List.scanl f (f x b) xs
 
 {-| Like `foldl1`, but keep each intermediate value. The head and length are not changed.
+
+This example starts with the number of ways to roll index _i_ on two six-sided dice (the probability density function),
+and turns it into the number of ways to roll at least _i_ (the cumulative density function).
+
+    dicePDF = Nonempty 0 [0,1,2,3,4,5,6,5,4,3,2,1]
+    diceCDF = scanl1 (+) dicePDF
+    diceCDF == Nonempty 0 [0,1,3,6,10,15,21,26,30,33,35,36]
 -}
 scanl1 : (a -> a -> a) -> Nonempty a -> Nonempty a
 scanl1 f (Nonempty x xs) =
