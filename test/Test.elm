@@ -117,6 +117,14 @@ testSuite =
       `for`
         tuple3 (nonemptylist int, nonemptylist string, nonemptylist char)
     , claim
+        "concatMap works the same as for a list"
+     `that`
+        (\(x,xs) -> NE.concatMap (\x -> NE.Nonempty x [2*x]) (NE.Nonempty x xs) |> NE.toList)
+     `is`
+        (\(x,xs) -> List.concatMap (\x -> [x, 2*x]) (x::xs))
+      `for`
+        nonemptylist int
+    , claim
         "filter works"
      `that`
         (\(x,xs) -> NE.Nonempty x xs |> NE.filter isEven -99 |> NE.toList)
