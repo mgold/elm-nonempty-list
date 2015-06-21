@@ -23,7 +23,7 @@ Nonempty lists support equality with the usual `(==)` operator.
 @docs replaceHead, replaceTail, dropTail
 
 # Map
-@docs map, map2
+@docs map, map2, andMap
 
 # Filter
 @docs filter
@@ -134,6 +134,14 @@ map f (Nonempty x xs) = Nonempty (f x) (List.map f xs)
 -}
 map2 : (a -> b -> c) -> Nonempty a -> Nonempty b -> Nonempty c
 map2 f (Nonempty x xs) (Nonempty y ys) = Nonempty (f x y) (List.map2 f xs ys)
+
+{-| Map over an arbitrary number of nonempty lists.
+
+    map2 (,) xs ys == map (,) xs `andMap` ys
+    head (map (,,) xs `andMap` ys `andMap` zs) == (head xs, head ys, head zs)
+-}
+andMap : Nonempty (a -> b) -> Nonempty a -> Nonempty b
+andMap = map2 (<|)
 
 {-| Determine if the nonempty list has exactly one element.
 -}

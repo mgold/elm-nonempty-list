@@ -92,6 +92,31 @@ testSuite =
       `for`
         nonemptylist int
     , claim
+        "length (map2 (,) xs ys) == min (length xs) (length ys)"
+     `that`
+        (\((x,xs), (y,ys)) -> NE.length (NE.map2 (,) (NE.Nonempty x xs) (NE.Nonempty y ys)))
+     `is`
+        (\((x,xs), (y,ys)) -> 1 + min (List.length xs) (List.length ys))
+      `for`
+        tuple (nonemptylist int, nonemptylist string)
+    , claim
+        "map2 (,) xs ys == map (,) xs `andMap` ys "
+     `that`
+        (\((x,xs), (y,ys)) -> NE.map2 (,) (NE.Nonempty x xs) (NE.Nonempty y ys))
+     `is`
+        (\((x,xs), (y,ys)) -> NE.map (,) (NE.Nonempty x xs) `NE.andMap` (NE.Nonempty y ys))
+      `for`
+        tuple (nonemptylist int, nonemptylist string)
+    , claim
+        "head (map (,,) xs `andMap` ys `andMap` zs) == (head xs, head ys, head zs)"
+     `that`
+        (\((x,xs), (y,ys), (z,zs)) -> NE.head
+            (NE.map (,,) (NE.Nonempty x xs) `NE.andMap` (NE.Nonempty y ys) `NE.andMap` (NE.Nonempty z zs)))
+     `is`
+        (\((x,xs), (y,ys), (z,zs)) -> (x,y,z))
+      `for`
+        tuple3 (nonemptylist int, nonemptylist string, nonemptylist char)
+    , claim
         "filter works"
      `that`
         (\(x,xs) -> NE.Nonempty x xs |> NE.filter isEven -99 |> NE.toList)
