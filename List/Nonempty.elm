@@ -23,7 +23,7 @@ Nonempty lists support equality with the usual `(==)` operator.
 @docs replaceHead, replaceTail, dropTail
 
 # Map
-@docs map, map2, andMap, concatMap
+@docs map, indexedMap, map2, andMap, concatMap
 
 # Filter
 @docs filter
@@ -148,6 +148,13 @@ define `andThen = flip concatMap`.
 -}
 concatMap : (a -> Nonempty b) -> Nonempty a -> Nonempty b
 concatMap f xs = concat (map f xs)
+
+{-| Same as `map` but the function is also applied to the index of each element (starting at zero).
+-}
+indexedMap : (Int -> a -> b) -> Nonempty a -> Nonempty b
+indexedMap f (Nonempty x xs) =
+    let wrapped i d = f (i+1) d
+    in Nonempty (f 0 x) (List.indexedMap wrapped xs)
 
 {-| Determine if the nonempty list has exactly one element.
 -}

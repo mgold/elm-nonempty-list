@@ -125,6 +125,14 @@ testSuite =
       `for`
         nonemptylist int
     , claim
+        "indexedMap works the same as for a list"
+     `that`
+        (\(x,xs) -> NE.indexedMap (,) (NE.Nonempty x xs) |> NE.toList)
+     `is`
+        (\(x,xs) -> List.indexedMap (,) (x::xs))
+      `for`
+        nonemptylist int
+    , claim
         "filter works"
      `that`
         (\(x,xs) -> NE.Nonempty x xs |> NE.filter isEven -99 |> NE.toList)
