@@ -17,7 +17,7 @@ Nonempty lists support equality with the usual `(==)` operator.
 @docs isSingleton, length, member
 
 # Convert
-@docs cons, append, pop, reverse, concat
+@docs cons, (:::), append, pop, reverse, concat
 
 # Swap
 @docs replaceHead, replaceTail, dropTail
@@ -70,12 +70,14 @@ tail (Nonempty x xs) = xs
 toList : Nonempty a -> List a
 toList (Nonempty x xs) = x::xs
 
-{-| Add another element as the head of the list. Also available infix as
-`(:::)`; be sure to add `exposing ((:::))` to your import.
+{-| Add another element as the head of the list, pushing the previous head to the tail.
 -}
 cons : a -> Nonempty a -> Nonempty a
 cons y (Nonempty x xs) = Nonempty y (x::xs)
 
+{-| Infix cons. Note that you cannot use this for pattern matching. Be sure to add `exposing ((:::))` to your import.
+-}
+(:::) : a -> Nonempty a -> Nonempty a
 (:::) = cons
 infixr 5 :::
 
