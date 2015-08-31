@@ -13,7 +13,7 @@ available.
 @docs head, tail, toList
 
 # Inspect
-Nonempty lists support equality with the usual `(==)` operator.
+Nonempty lists support equality with the usual `(==)` operator (provided their contents also support equality).
 @docs isSingleton, length, member
 
 # Convert
@@ -39,7 +39,7 @@ The nonempty list's elements must support equality (e.g. not functions or signal
 -}
 
 {-| The Nonempty type. If you have both a head and tail, you can construct a
-nonempty list directly. Usually you'll use one of the many helpers below instead.
+nonempty list directly. Otherwise use the helpers below instead.
 -}
 type Nonempty a = Nonempty a (List a)
 
@@ -236,14 +236,16 @@ foldl1 f (Nonempty x xs) = List.foldl f x xs
 
 {-| Like `foldl`, but keep each intermediate value. For example, scan addition to create the cumulative sum up to each
 element. The head of the new nonempty list is always the base case provided, and the length increases by 1.
+
+    scanl (++) "" (Nonempty "a" ["b", "c"]) == Nonempty "" ["a","ba","cba"]
 -}
 scanl : (a -> b -> b) -> b -> Nonempty a -> Nonempty b
 scanl f b (Nonempty x xs) = Nonempty b <| List.scanl f (f x b) xs
 
 {-| Like `foldl1`, but keep each intermediate value. The head and length are not changed.
 
-This example starts with the number of ways to roll index _i_ on two six-sided dice (the probability density function),
-and turns it into the number of ways to roll at least _i_ (the cumulative density function).
+This example starts with the number of ways to roll exactly index _i_ on two six-sided dice (the probability density
+function), and turns it into the number of ways to roll at least _i_ (the cumulative density function).
 
     dicePDF = Nonempty 0 [0,1,2,3,4,5,6,5,4,3,2,1]
     diceCDF = scanl1 (+) dicePDF
