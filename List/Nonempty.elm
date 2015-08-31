@@ -14,7 +14,7 @@ available.
 
 # Inspect
 Nonempty lists support equality with the usual `(==)` operator (provided their contents also support equality).
-@docs isSingleton, length, member
+@docs isSingleton, length, member, all, any
 
 # Convert
 @docs cons, (:::), append, pop, reverse, concat
@@ -172,6 +172,16 @@ length (Nonempty x xs) = List.length xs + 1
 -}
 member : a -> Nonempty a -> Bool
 member y (Nonempty x xs) = x == y || List.member y xs
+
+{-| Determine if all elements satisfy the predicate.
+-}
+all : (a -> Bool) -> Nonempty a -> Bool
+all f (Nonempty x xs) = f x && List.all f xs
+
+{-| Determine if any elements satisfy the predicate.
+-}
+any : (a -> Bool) -> Nonempty a -> Bool
+any f (Nonempty x xs) = f x || List.any f xs
 
 {-| Filter a nonempty list. If all values are filtered out, return the singleton list containing the default value
 provided. If any value is retained, the default value is not used. If you want to deal with a Maybe instead, use
