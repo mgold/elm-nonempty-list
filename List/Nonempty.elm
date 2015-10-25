@@ -53,7 +53,7 @@ fromElement x = Nonempty x []
 fromList : List a -> Maybe (Nonempty a)
 fromList ys = case ys of
     x::xs -> Just (Nonempty x xs)
-    _ -> Nothing
+    [] -> Nothing
 
 {-| Return the head of the list.
 -}
