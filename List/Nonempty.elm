@@ -10,7 +10,7 @@ available.
 @docs fromElement, fromList
 
 # Access
-@docs head, tail, toList, get
+@docs head, tail, toList, get, sample
 
 # Inspect
 Nonempty lists support equality with the usual `(==)` operator (provided their contents also support equality).
@@ -39,6 +39,7 @@ The nonempty list's elements must support equality (e.g. not functions or signal
 -}
 
 import Debug
+import Random
 
 {-| The Nonempty type. If you have both a head and tail, you can construct a
 nonempty list directly. Otherwise use the helpers below instead.
@@ -83,6 +84,15 @@ get i (Nonempty x xs) =
           [] -> Debug.crash "This can't happen: attempted to take value at safe index from empty list"
           z::zs -> if k == 0 then z else find (k-1) zs
   in if j == 0 then x else find (j-1) xs
+
+
+{-| Produce a value of the nonempty list uniformly at random, and the new random seed.
+-}
+sample : Random.Seed -> Nonempty a -> (a, Random.Seed)
+sample seed nonempty =
+  let gen = Random.int 0 (length nonempty - 1)
+      (i, seed2) = Random.generate gen seed
+  in (get i nonempty, seed2)
 
 {-| Add another element as the head of the list, pushing the previous head to the tail.
 -}
