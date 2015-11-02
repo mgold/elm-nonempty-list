@@ -24,6 +24,7 @@ testSuite =
         (\(x,xs) -> NE.isSingleton (NE.dropTail (NE.Nonempty x xs)))
       `for`
         nonemptylist int
+
     , claim
         "converting to and from a normal list is the identity"
       `that`
@@ -32,6 +33,7 @@ testSuite =
         (\(x,xs) -> Just (NE.Nonempty x xs))
       `for`
         nonemptylist int
+
     , claim
         "length is 1 more than `length tail`"
      `that`
@@ -40,6 +42,7 @@ testSuite =
         (\(x,xs) -> List.length xs + 1)
       `for`
         nonemptylist int
+
     , claim
         "cons works"
      `that`
@@ -48,12 +51,14 @@ testSuite =
         (\(y, (x,xs)) -> y :: x :: xs)
       `for`
         tuple (int, nonemptylist int)
+
     , claim
         "fromElement results in a singleton"
      `true`
        (\x -> NE.isSingleton (NE.fromElement x))
      `for`
        int
+
     , claim
         "append works"
      `that`
@@ -65,6 +70,7 @@ testSuite =
         (\((x,xs), (y,ys)) -> x :: xs ++ y :: ys)
       `for`
         tuple (nonemptylist int, nonemptylist int)
+
     , claim
         "append never results in a singleton"
      `false`
@@ -74,6 +80,27 @@ testSuite =
            in NE.isSingleton <| xz `NE.append` yz)
      `for`
        tuple (nonemptylist int, nonemptylist int)
+
+    , claim
+        "get 0  == head"
+     `that`
+        (\(x,xs) ->
+            let xz = (NE.Nonempty x xs)
+            in NE.get 0 xz)
+     `is`
+        fst
+      `for`
+        nonemptylist int
+
+    , claim
+        "getting any index from singleton produces the value"
+     `that`
+        (\(x,i) -> NE.get i (NE.fromElement x))
+     `is`
+        fst
+      `for`
+        tuple (int, int)
+
     , claim
         "fromList fails only for the empty List"
      `true`
@@ -83,6 +110,7 @@ testSuite =
                 )
      `for`
        list int
+
     , claim
         "map then toList == List.map"
      `that`
@@ -91,6 +119,7 @@ testSuite =
         (\(x,xs) -> x::xs |> List.map ((*) 2))
       `for`
         nonemptylist int
+
     , claim
         "length (map2 (,) xs ys) == min (length xs) (length ys)"
      `that`
@@ -99,6 +128,7 @@ testSuite =
         (\((x,xs), (y,ys)) -> 1 + min (List.length xs) (List.length ys))
       `for`
         tuple (nonemptylist int, nonemptylist string)
+
     , claim
         "map2 (,) xs ys == map (,) xs `andMap` ys "
      `that`
@@ -107,6 +137,7 @@ testSuite =
         (\((x,xs), (y,ys)) -> NE.map (,) (NE.Nonempty x xs) `NE.andMap` (NE.Nonempty y ys))
       `for`
         tuple (nonemptylist int, nonemptylist string)
+
     , claim
         "head (map (,,) xs `andMap` ys `andMap` zs) == (head xs, head ys, head zs)"
      `that`
@@ -116,6 +147,7 @@ testSuite =
         (\((x,xs), (y,ys), (z,zs)) -> (x,y,z))
       `for`
         tuple3 (nonemptylist int, nonemptylist string, nonemptylist char)
+
     , claim
         "concatMap works the same as for a list"
      `that`
@@ -124,6 +156,7 @@ testSuite =
         (\(x,xs) -> List.concatMap (\x -> [x, 2*x]) (x::xs))
       `for`
         nonemptylist int
+
     , claim
         "indexedMap works the same as for a list"
      `that`
@@ -132,6 +165,7 @@ testSuite =
         (\(x,xs) -> List.indexedMap (,) (x::xs))
       `for`
         nonemptylist int
+
     , claim
         "filter works"
      `that`
@@ -141,6 +175,7 @@ testSuite =
                     in if List.isEmpty filtered then [-99] else filtered)
       `for`
         nonemptylist int
+
     , claim
         "Filtering everything out results in the default value"
      `that`
@@ -149,6 +184,7 @@ testSuite =
         (\((x,xs), d) -> [d])
       `for`
         tuple (nonemptylist int, int)
+
     , claim
         "Filtering nothing out is the identity"
      `that`
@@ -157,6 +193,7 @@ testSuite =
         (\((x,xs), d) -> NE.Nonempty x xs)
       `for`
         tuple (nonemptylist int, int)
+
     , claim
         "Equal lists equate true"
      `true`
@@ -164,11 +201,13 @@ testSuite =
       `for`
         nonemptylist int
     , claim
+
         "Unequal lists equate false"
      `false`
         (\((x,xs), d) -> NE.Nonempty x xs == d ::: NE.Nonempty x xs)
       `for`
         tuple (nonemptylist int, int)
+
     , claim
         "popping reduces the length by 1 except for singleton lists"
      `true`
@@ -177,6 +216,7 @@ testSuite =
                     in lengthReduced || NE.isSingleton ys)
       `for`
         nonemptylist int
+
     , claim
         "pop xs == tail xs except for singleton lists"
      `true`
@@ -185,6 +225,7 @@ testSuite =
                     in tailEquals || NE.isSingleton ys)
       `for`
         nonemptylist int
+
     , claim
         "reversing twice is the identity"
      `that`
@@ -194,6 +235,7 @@ testSuite =
         (\(x,xs) -> NE.Nonempty x xs)
       `for`
         nonemptylist int
+
     , claim
         "reversing is equal to the ordinary list reverse"
      `that`
@@ -203,6 +245,7 @@ testSuite =
         (\(x,xs) -> List.reverse (x::xs))
       `for`
         nonemptylist int
+
     , claim
         "replaceTail is equal to doing so with an ordinary list"
      `that`
@@ -212,6 +255,7 @@ testSuite =
         (\(ys, x, xs) -> x::ys)
       `for`
         tuple3 (list int, int, list int)
+
     , claim
         "concat is equal to doing so with an ordinary list"
      `that`
@@ -224,6 +268,7 @@ testSuite =
                            in List.concat ((x::xs)::ys'))
       `for`
         nonemptylist (nonemptylist int)
+
     , claim
         "member checks the head and the tail"
      `that`
@@ -233,6 +278,7 @@ testSuite =
         (\(x, xs, y) -> x == y || List.member y xs)
       `for`
         tuple3 (int, list int, int)
+
     , claim
         "foldl is the same as for a list"
      `that`
@@ -242,6 +288,7 @@ testSuite =
         (\(x,xs) -> List.foldl (++) "" (x::xs))
       `for`
         nonemptylist string
+
     , claim
         "foldl1 is the same as for a list"
      `that`
@@ -251,6 +298,7 @@ testSuite =
         (\(x,xs) -> List.foldl (++) "" (x::xs))
       `for`
         nonemptylist string
+
     , suite "scanning"
         [ claim
             "scanl is the same as for a list"
@@ -261,6 +309,7 @@ testSuite =
             (\(x,xs) -> List.scanl (++) "" (x::xs))
           `for`
             nonemptylist string
+
         , claim
             "The head of the result of scanl is the base case"
          `that`
@@ -271,6 +320,7 @@ testSuite =
             (\(x,xs) -> "")
           `for`
             nonemptylist string
+
         , claim
             "The tail of the result of scanl is the result of scanl1"
          `that`
@@ -283,6 +333,7 @@ testSuite =
                         in NE.toList scanned)
           `for`
             nonemptylist string
+
         , claim
             "scanl adds 1 to the length"
          `that`
@@ -293,6 +344,7 @@ testSuite =
             (\(x,xs) -> 2 + List.length xs)
           `for`
             nonemptylist int
+
         , claim
             "scanl1 does not change the length"
          `that`
@@ -303,6 +355,7 @@ testSuite =
             (\(x,xs) -> 1 + List.length xs)
           `for`
             nonemptylist int
+
         , claim
             "scanl with string concatenation never decreases the length"
          `true`
@@ -314,6 +367,7 @@ testSuite =
                         in List.all identity bools)
           `for`
             nonemptylist string
+
         , claim
             "scanl1 does not change the head"
          `that`
@@ -341,6 +395,7 @@ dedupeSuite =
         , [1..4] `equals` mk 1 [1..4]
         , [3, 1, 2, 3] `equals` mk 3 [1..3]
         ]
+
 uniqSuite =
     let mk x xs = NE.Nonempty x xs |> NE.uniq |> NE.toList
     in ElmTest.Test.suite "uniq"
@@ -356,8 +411,21 @@ uniqSuite =
         , [3, 1, 2] `equals` mk 3 [1..3]
         ]
 
+getSuite =
+    let xs = NE.Nonempty 10 [11, 12]
+    in ElmTest.Test.suite "get"
+        [ NE.get -4 xs `equals` 12
+        , NE.get -3 xs `equals` 10
+        , NE.get -2 xs `equals` 11
+        , NE.get -1 xs `equals` 12
+        , NE.get 0 xs `equals` 10
+        , NE.get 1 xs `equals` 11
+        , NE.get 2 xs `equals` 12
+        , NE.get 3 xs `equals` 10
+        ]
+
 unitSuite = ElmTest.Test.suite "all unit tests"
-    [dedupeSuite, uniqSuite]
+    [getSuite, dedupeSuite, uniqSuite]
 
 result = quickCheck testSuite
 

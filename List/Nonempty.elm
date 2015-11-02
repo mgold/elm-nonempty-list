@@ -10,7 +10,7 @@ available.
 @docs fromElement, fromList
 
 # Access
-@docs head, tail, toList
+@docs head, tail, toList, get
 
 # Inspect
 Nonempty lists support equality with the usual `(==)` operator (provided their contents also support equality).
@@ -37,6 +37,8 @@ The nonempty list's elements must support equality (e.g. not functions or signal
 @docs dedup, uniq
 
 -}
+
+import Debug
 
 {-| The Nonempty type. If you have both a head and tail, you can construct a
 nonempty list directly. Otherwise use the helpers below instead.
@@ -69,6 +71,18 @@ tail (Nonempty x xs) = xs
 -}
 toList : Nonempty a -> List a
 toList (Nonempty x xs) = x::xs
+
+{-| Get the item at the specified index. The head has index 0. Indices are modulused by the length so out-of-range
+errors can't happen. This means that negative indices are supported, e.g. -1 to get the last element.
+-}
+get : Int -> Nonempty a -> a
+get i (Nonempty x xs) =
+  let j = i % (1 + List.length xs)
+      find k ys =
+        case ys of
+          [] -> Debug.crash "This can't happen: attempted to take value at safe index from empty list"
+          z::zs -> if k == 0 then z else find (k-1) zs
+  in if j == 0 then x else find (j-1) xs
 
 {-| Add another element as the head of the list, pushing the previous head to the tail.
 -}
