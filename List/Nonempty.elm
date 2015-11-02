@@ -100,6 +100,8 @@ cons : a -> Nonempty a -> Nonempty a
 cons y (Nonempty x xs) = Nonempty y (x::xs)
 
 {-| Infix cons. Note that you cannot use this for pattern matching. Be sure to add `exposing ((:::))` to your import.
+
+    4 ::: Nonempty 3 [2,1] == Nonempty 4 [3,2,1]
 -}
 (:::) : a -> Nonempty a -> Nonempty a
 (:::) = cons
@@ -112,6 +114,9 @@ append (Nonempty x xs) (Nonempty y ys) = Nonempty x (xs ++ y :: ys)
 
 {-| Pop and discard the head, or do nothing for a singleton list. Useful if you
 want to exhaust a list but hang on to the last item indefinitely.
+
+    pop (Nonempty 3 [2,1]) == Nonempty 2 [1]
+    pop (Nonempty 1 []) == Nonempty 1 []
 -}
 pop : Nonempty a -> Nonempty a
 pop (Nonempty x xs) = case xs of
