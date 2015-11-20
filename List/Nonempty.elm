@@ -105,6 +105,9 @@ cons y (Nonempty x xs) = Nonempty y (x::xs)
 -}
 (:::) : a -> Nonempty a -> Nonempty a
 (:::) = cons
+-- If you're using another library that also defines (:::), the compiler may complain about this line.
+-- If so, you may comment it out in your local copy, and not use it. Everything else will still work.
+-- More info: https://github.com/elm-lang/elm-compiler/issues/1096
 infixr 5 :::
 
 {-| Append two nonempty lists together. `(++)` is _not_ supported.
