@@ -3,7 +3,7 @@ module Test where
 
 import String
 
-import Check exposing (claim, that, is, true, false, for, quickCheck, Evidence(Multiple, Unit))
+import Check exposing (claim, that, is, true, false, for, quickCheck)
 import Check.Investigator exposing (tuple, tuple3, char, int, list, string)
 import ElmTest exposing (equals, elementRunner)
 import List.Nonempty as NE exposing ((:::))
@@ -426,9 +426,10 @@ getSuite =
         , NE.get 3 xs `equals` 10
         ]
 
-result : Evidence
+result : Check.Evidence
 result = quickCheck testSuite
 
+unitSuite : ElmTest.Test
 unitSuite = ElmTest.suite "all unit tests"
     [evidenceToTest result, getSuite, dedupeSuite, uniqSuite]
 
@@ -440,17 +441,17 @@ fail = ElmTest.assert False
 
 nChecks n = if n == 1 then "1 check" else toString n ++ " checks"
 
-evidenceToTest : Evidence -> ElmTest.Test
+evidenceToTest : Check.Evidence -> ElmTest.Test
 evidenceToTest evidence =
   case evidence of
-    Multiple name more ->
+    Check.Multiple name more ->
       ElmTest.suite name (List.map evidenceToTest more)
 
-    Unit (Ok {name, numberOfChecks}) ->
+    Check.Unit (Ok {name, numberOfChecks}) ->
       ElmTest.test (name ++ ": passed " ++ nChecks numberOfChecks) succeed
 
-    Unit (Err {name, numberOfChecks, expected, actual, counterExample}) ->
+    Check.Unit (Err {name, numberOfChecks, expected, actual, counterExample}) ->
       ElmTest.test (name ++ ": FAILED " ++ nChecks numberOfChecks ++ "! Counterexample: " ++
-      counterExample ++ " Expected: " ++ expected ++ " but got: " ++ actual) fail
+        counterExample ++ " Expected: " ++ expected ++ " but got: " ++ actual) fail
 
 main = elementRunner unitSuite
