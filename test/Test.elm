@@ -1,13 +1,11 @@
 module Test where
 {-| -}
 
-import Graphics.Element exposing (above)
-import Html
+import Graphics.Element exposing (above, show)
+import String
 import Check exposing (..)
 import Check.Investigator exposing (..)
-import Check.Runner.Browser exposing (..)
-import ElmTest.Test exposing (equals)
-import ElmTest.Runner.Element exposing (runDisplay)
+import ElmTest exposing (equals, elementRunner)
 import List.Nonempty as NE exposing ((:::))
 import Debug
 import String
@@ -105,9 +103,8 @@ testSuite =
         "fromList fails only for the empty List"
      `true`
        (\xs -> case NE.fromList xs of
-                Just _ -> not (List.isEmpty xs)
-                Nothing -> List.isEmpty xs
-                )
+                 Just _ -> not (List.isEmpty xs)
+                 Nothing -> List.isEmpty xs)
      `for`
        list int
 
@@ -383,7 +380,7 @@ testSuite =
 
 dedupeSuite =
     let mk x xs = NE.Nonempty x xs |> NE.dedup |> NE.toList
-    in ElmTest.Test.suite "deduplication"
+    in ElmTest.suite "deduplication"
         [ [1] `equals` mk 1 []
         , [1, 2] `equals` mk 1 [2]
         , [1, 2] `equals` mk 1 [2, 2]
@@ -398,7 +395,7 @@ dedupeSuite =
 
 uniqSuite =
     let mk x xs = NE.Nonempty x xs |> NE.uniq |> NE.toList
-    in ElmTest.Test.suite "uniq"
+    in ElmTest.suite "uniq"
         [ [1] `equals` mk 1 []
         , [1, 2] `equals` mk 1 [2]
         , [1, 2] `equals` mk 1 [2, 2]
@@ -413,7 +410,7 @@ uniqSuite =
 
 getSuite =
     let xs = NE.Nonempty 10 [11, 12]
-    in ElmTest.Test.suite "get"
+    in ElmTest.suite "get"
         [ NE.get -4 xs `equals` 12
         , NE.get -3 xs `equals` 10
         , NE.get -2 xs `equals` 11
@@ -424,9 +421,13 @@ getSuite =
         , NE.get 3 xs `equals` 10
         ]
 
-unitSuite = ElmTest.Test.suite "all unit tests"
+unitSuite = ElmTest.suite "all unit tests"
     [getSuite, dedupeSuite, uniqSuite]
 
 result = quickCheck testSuite
 
-main = Html.div [] [display result, Html.fromElement (runDisplay unitSuite)]
+runner x =
+  let b = String.contains "Err" (toString x)
+  in if b then "FAILED A TEST: " ++ (toString x) else "PASSED ALL PROPERTY TESTS."
+
+main = show (runner result) `above` elementRunner unitSuite
