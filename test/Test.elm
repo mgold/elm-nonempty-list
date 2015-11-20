@@ -1,21 +1,19 @@
 module Test where
 {-| -}
 
-import Graphics.Element exposing (above, show)
 import String
-import Check exposing (..)
-import Check.Investigator exposing (..)
+
+import Check exposing (claim, that, is, true, false, for, quickCheck, Evidence(Multiple, Unit))
+import Check.Investigator exposing (tuple, tuple3, char, int, list, string)
 import ElmTest exposing (equals, elementRunner)
 import List.Nonempty as NE exposing ((:::))
-import Debug
-import String
 
 nonemptylist elem = tuple (elem, list elem)
 
 isEven n = n % 2 == 0
 
 testSuite =
-    suite "Nonempty List Test Suite"
+    Check.suite "Nonempty List Test Suite"
     [ claim
         "dropping tail makes singleton"
       `true`
@@ -197,20 +195,27 @@ testSuite =
         (\(x,xs) -> NE.Nonempty x xs == NE.map identity (NE.Nonempty x xs))
       `for`
         nonemptylist int
-    , claim
 
-        "Unequal lists equate false"
+     , claim
+        "Lists of nonequal length equate false"
      `false`
         (\((x,xs), d) -> NE.Nonempty x xs == d ::: NE.Nonempty x xs)
       `for`
         tuple (nonemptylist int, int)
+
+     , claim
+        "Lists with unequal heads equate false"
+     `false`
+        (\(x,xs) -> NE.Nonempty x xs == NE.Nonempty (x+1) xs)
+      `for`
+        nonemptylist int
 
     , claim
         "popping reduces the length by 1 except for singleton lists"
      `true`
         (\(x,xs) -> let ys = NE.Nonempty x xs
                         lengthReduced = (NE.length ys) - 1 == NE.length (NE.pop ys)
-                    in lengthReduced || NE.isSingleton ys)
+                    in lengthReduced `xor` NE.isSingleton ys)
       `for`
         nonemptylist int
 
@@ -296,7 +301,7 @@ testSuite =
       `for`
         nonemptylist string
 
-    , suite "scanning"
+    , Check.suite "scanning"
         [ claim
             "scanl is the same as for a list"
          `that`
@@ -421,13 +426,31 @@ getSuite =
         , NE.get 3 xs `equals` 10
         ]
 
-unitSuite = ElmTest.suite "all unit tests"
-    [getSuite, dedupeSuite, uniqSuite]
-
+result : Evidence
 result = quickCheck testSuite
 
-runner x =
-  let b = String.contains "Err" (toString x)
-  in if b then "FAILED A TEST: " ++ (toString x) else "PASSED ALL PROPERTY TESTS."
+unitSuite = ElmTest.suite "all unit tests"
+    [evidenceToTest result, getSuite, dedupeSuite, uniqSuite]
 
-main = show (runner result) `above` elementRunner unitSuite
+succeed : ElmTest.Assertion
+succeed = ElmTest.assert True
+
+fail : ElmTest.Assertion
+fail = ElmTest.assert False
+
+nChecks n = if n == 1 then "1 check" else toString n ++ " checks"
+
+evidenceToTest : Evidence -> ElmTest.Test
+evidenceToTest evidence =
+  case evidence of
+    Multiple name more ->
+      ElmTest.suite name (List.map evidenceToTest more)
+
+    Unit (Ok {name, numberOfChecks}) ->
+      ElmTest.test (name ++ ": passed " ++ nChecks numberOfChecks) succeed
+
+    Unit (Err {name, numberOfChecks, expected, actual, counterExample}) ->
+      ElmTest.test (name ++ ": FAILED " ++ nChecks numberOfChecks ++ "! Counterexample: " ++
+      counterExample ++ " Expected: " ++ expected ++ " but got: " ++ actual) fail
+
+main = elementRunner unitSuite
