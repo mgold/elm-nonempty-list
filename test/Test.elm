@@ -1,11 +1,10 @@
-module Test where
-{-| -}
-
 import String
+import Task exposing (Task)
 
 import Check exposing (claim, that, is, true, false, for, quickCheck)
 import Check.Investigator exposing (tuple, tuple3, char, int, list, string)
 import ElmTest exposing (equals, elementRunner)
+import Console
 import List.Nonempty as NE exposing ((:::))
 
 nonemptylist elem = tuple (elem, list elem)
@@ -455,3 +454,6 @@ evidenceToTest evidence =
         counterExample ++ " Expected: " ++ expected ++ " but got: " ++ actual) fail
 
 main = elementRunner unitSuite
+
+port io : Signal (Task x ())
+port io = Console.run (ElmTest.consoleRunner unitSuite)
