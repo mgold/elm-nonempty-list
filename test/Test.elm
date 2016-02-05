@@ -12,7 +12,7 @@ nonemptylist elem = tuple (elem, list elem)
 isEven n = n % 2 == 0
 
 testSuite =
-    Check.suite "Nonempty List Test Suite"
+    Check.suite "Property-based checks"
     [ claim
         "dropping tail makes singleton"
       `true`
@@ -77,7 +77,7 @@ testSuite =
        tuple (nonemptylist int, nonemptylist int)
 
     , claim
-        "get 0  == head"
+        "get 0 == head"
      `that`
         (\(x,xs) ->
             let xz = (NE.Nonempty x xs)
@@ -432,12 +432,6 @@ unitSuite : ElmTest.Test
 unitSuite = ElmTest.suite "all unit tests"
     [evidenceToTest result, getSuite, dedupeSuite, uniqSuite]
 
-succeed : ElmTest.Assertion
-succeed = ElmTest.assert True
-
-fail : ElmTest.Assertion
-fail = ElmTest.assert False
-
 nChecks n = if n == 1 then "1 check" else toString n ++ " checks"
 
 evidenceToTest : Check.Evidence -> ElmTest.Test
@@ -447,11 +441,12 @@ evidenceToTest evidence =
       ElmTest.suite name (List.map evidenceToTest more)
 
     Check.Unit (Ok {name, numberOfChecks}) ->
-      ElmTest.test (name ++ ": passed " ++ nChecks numberOfChecks) succeed
+      ElmTest.test (name ++ " [" ++ nChecks numberOfChecks ++ "]") ElmTest.pass
 
     Check.Unit (Err {name, numberOfChecks, expected, actual, counterExample}) ->
-      ElmTest.test (name ++ ": FAILED " ++ nChecks numberOfChecks ++ "! Counterexample: " ++
-        counterExample ++ " Expected: " ++ expected ++ " but got: " ++ actual) fail
+      ElmTest.test name <| ElmTest.fail <|
+        "On check " ++ toString numberOfChecks ++ ", found counterexample: " ++
+        counterExample ++ " Expected " ++ expected ++ " but got " ++ actual
 
 main = elementRunner unitSuite
 
