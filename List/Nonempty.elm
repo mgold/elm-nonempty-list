@@ -38,7 +38,6 @@ The nonempty list's elements must support equality (e.g. not functions or signal
 
 -}
 
-import Debug
 import Random
 
 {-| The Nonempty type. If you have both a head and tail, you can construct a
@@ -77,8 +76,8 @@ toList (Nonempty x xs) = x::xs
 errors can't happen. This means that negative indices are supported, e.g. -1 to get the last element.
 -}
 get : Int -> Nonempty a -> a
-get i (Nonempty x xs) =
-  let j = i % (1 + List.length xs)
+get i (Nonempty x xs as ne) =
+  let j = i % (length ne)
       find k ys =
         case ys of
           [] -> Debug.crash "This can't happen: attempted to take value at safe index from empty list"
@@ -230,7 +229,9 @@ filter p d (Nonempty x xs) =
         [] -> Nonempty d []
         y::ys -> Nonempty y ys
 
-{-| Remove _adjacent_ duplicate elements from the nonempty list. For example, `1,2,2,1` becomes `1,2,1`.
+{-| Remove _adjacent_ duplicate elements from the nonempty list.
+
+    dedup (Nonempty 1 [2, 2, 1]) == Nonempty 1 [2, 1]
 -}
 dedup : Nonempty a -> Nonempty a
 dedup (Nonempty x xs) =
@@ -242,7 +243,9 @@ dedup (Nonempty x xs) =
                      else dedupe y (prev::done) ys
     in reverse <| dedupe x [] xs
 
-{-| Remove _all_ duplicate elements from the nonempty list, with the remaining elements ordered by first occurrence. For example, `1,2,2,1` becomes `1,2`.
+{-| Remove _all_ duplicate elements from the nonempty list, with the remaining elements ordered by first occurrence.
+
+    uniq (Nonempty 1 [2, 2, 1]) == Nonempty 1 [2]
 -}
 uniq : Nonempty a -> Nonempty a
 uniq (Nonempty x xs) =

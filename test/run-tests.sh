@@ -9,6 +9,7 @@ read -d '' handler <<- EOF
 })();
 EOF
 
+rm -rf elm-stuff/build-artifacts/*
 elm make Test.elm --yes 2>/dev/null # This will error
 elm make && # And this fixes it. Somehow.
 elm make Test.elm --output=test.js &&

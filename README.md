@@ -18,6 +18,6 @@ foldl1 (+) two == 6
 For actual usage, I recommend `import List.Nonempty as NE exposing (Nonempty, (:::))` to import the type and infix cons.
 
 ## Testing
-Run `elm reactor` in the test directory, open `Test.elm`, and wait a few seconds while libraries are downloaded. You may have to comment out the infix declaration of (:::).
+`cd test; sh run-tests.sh`
 
 Thanks to all the work that went into property-based testing, even if it's overkill for this tiny library.
