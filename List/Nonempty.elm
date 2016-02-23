@@ -32,6 +32,9 @@ Nonempty lists support equality with the usual `(==)` operator (provided their c
 To fold or scan from the right, reverse the list first.
 @docs foldl, foldl1, scanl, scanl1
 
+# Sort
+@docs sort, sortBy, sortWith
+
 # Deduplicate
 The nonempty list's elements must support equality (e.g. not functions or signals). Otherwise  you will get a runtime error.
 @docs dedup, uniq
@@ -323,6 +326,42 @@ filter p d (Nonempty x xs) =
 
       y :: ys ->
         Nonempty y ys
+
+
+{-| Sort a nonempty list of comparable things, lowest to highest.
+-}
+sort : Nonempty comparable -> Nonempty comparable
+sort (Nonempty x xs) =
+  case List.sort (x :: xs) of
+    y :: ys ->
+      Nonempty y ys
+
+    [] ->
+      Debug.crash "This can't happen: sorting a nonempty list returned an empty list"
+
+
+{-| Sort a nonempty list of things by a derived property.
+-}
+sortBy : (a -> comparable) -> Nonempty a -> Nonempty a
+sortBy f (Nonempty x xs) =
+  case List.sortBy f (x :: xs) of
+    y :: ys ->
+      Nonempty y ys
+
+    [] ->
+      Debug.crash "This can't happen: sortBying a nonempty list returned an empty list"
+
+
+{-| Sort a nonempty list of things by a custom comparison function.
+-}
+sortWith : (a -> a -> Order) -> Nonempty a -> Nonempty a
+sortWith f (Nonempty x xs) =
+  case List.sortWith f (x :: xs) of
+    y :: ys ->
+      Nonempty y ys
+
+    [] ->
+      Debug.crash "This can't happen: sortWithing a nonempty list returned an empty list"
 
 
 {-| Remove _adjacent_ duplicate elements from the nonempty list.

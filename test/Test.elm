@@ -300,6 +300,36 @@ testSuite =
       `for`
         nonemptylist string
 
+    , claim
+        "sort is the same as for a list"
+     `that`
+        (\(x,xs) -> let ys = NE.Nonempty x xs
+                    in NE.sort ys |> NE.toList)
+      `is`
+        (\(x,xs) -> List.sort (x::xs))
+      `for`
+        nonemptylist string
+
+    , claim
+        "sortBy is the same as for a list"
+     `that`
+        (\(x,xs) -> let ys = NE.Nonempty x xs |> NE.map (\s -> {name = s})
+                    in NE.sortBy .name ys |> NE.toList)
+      `is`
+        (\(x,xs) -> List.sortBy .name <| List.map (\s -> {name = s}) (x::xs))
+      `for`
+        nonemptylist string
+
+      , claim
+          "sortWith is the same as for a list"
+       `that`
+          (\(x,xs) -> let ys = NE.Nonempty x xs
+                      in NE.sortWith compare ys |> NE.toList)
+        `is`
+          (\(x,xs) -> List.sortWith compare (x::xs))
+        `for`
+          nonemptylist string
+
     , Check.suite "scanning"
         [ claim
             "scanl is the same as for a list"
