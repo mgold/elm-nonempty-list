@@ -21,3 +21,7 @@ For actual usage, I recommend `import List.Nonempty as NE exposing (Nonempty, (:
 `cd test; sh run-tests.sh`
 
 Thanks to all the work that went into property-based testing, even if it's overkill for this tiny library.
+
+## Upgrading
+
+The only breaking change from 1.x to 2.0.0 is that `sample` returns a generator rather than managing seeds.
