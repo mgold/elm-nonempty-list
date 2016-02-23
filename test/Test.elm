@@ -1,4 +1,5 @@
 import String
+import Random
 import Task exposing (Task)
 
 import Check exposing (claim, that, is, true, false, for, quickCheck)
@@ -95,6 +96,19 @@ testSuite =
         fst
       `for`
         tuple (int, int)
+
+    , claim
+        "sample will eventually produce every element"
+    `true`
+      (\i -> let
+        seed0 = Random.initialSeed i
+        gen = NE.sample (NE.Nonempty 1 [2,3,4,5,6]) |> Random.list 50
+        results = Random.generate gen seed0 |> fst |> NE.fromList
+            |> Maybe.map NE.uniq |> Maybe.map (\ne -> NE.length ne == 6)
+        in
+          results == Just True)
+    `for`
+      int
 
     , claim
         "fromList fails only for the empty List"

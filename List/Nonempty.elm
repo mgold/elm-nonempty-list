@@ -117,18 +117,12 @@ get i ((Nonempty x xs) as ne) =
       find (j - 1) xs
 
 
-{-| Produce a value of the nonempty list uniformly at random, and the new random seed.
+{-| Create a random generator that returns a value of the nonempty list chosen uniformly at random.
 -}
-sample : Random.Seed -> Nonempty a -> ( a, Random.Seed )
-sample seed nonempty =
-  let
-    gen =
-      Random.int 0 (length nonempty - 1)
-
-    ( i, seed2 ) =
-      Random.generate gen seed
-  in
-    ( get i nonempty, seed2 )
+sample : Nonempty a -> Random.Generator a
+sample nonempty =
+  Random.int 0 (length nonempty - 1)
+    |> Random.map (\i -> get i nonempty)
 
 
 {-| Add another element as the head of the list, pushing the previous head to the tail.
