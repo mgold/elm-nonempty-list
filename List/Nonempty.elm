@@ -1,4 +1,4 @@
-module List.Nonempty where
+module List.Nonempty (..) where
 
 {-| A list that cannot be empty. The head and tail can be accessed without Maybes. Most other list functions are
 available.
@@ -40,79 +40,123 @@ The nonempty list's elements must support equality (e.g. not functions or signal
 
 import Random
 
+
 {-| The Nonempty type. If you have both a head and tail, you can construct a
 nonempty list directly. Otherwise use the helpers below instead.
 -}
-type Nonempty a = Nonempty a (List a)
+type Nonempty a
+  = Nonempty a (List a)
+
 
 {-| Create a singleton list with the given element.
 -}
 fromElement : a -> Nonempty a
-fromElement x = Nonempty x []
+fromElement x =
+  Nonempty x []
+
 
 {-| Create a nonempty list from an ordinary list, failing on the empty list.
 -}
 fromList : List a -> Maybe (Nonempty a)
-fromList ys = case ys of
-    x::xs -> Just (Nonempty x xs)
-    _ -> Nothing
+fromList ys =
+  case ys of
+    x :: xs ->
+      Just (Nonempty x xs)
+
+    _ ->
+      Nothing
+
 
 {-| Return the head of the list.
 -}
 head : Nonempty a -> a
-head (Nonempty x xs) = x
+head (Nonempty x xs) =
+  x
+
 
 {-| Return the tail of the list.
 -}
 tail : Nonempty a -> List a
-tail (Nonempty x xs) = xs
+tail (Nonempty x xs) =
+  xs
+
 
 {-| Convert to an ordinary list.
 -}
 toList : Nonempty a -> List a
-toList (Nonempty x xs) = x::xs
+toList (Nonempty x xs) =
+  x :: xs
+
 
 {-| Get the item at the specified index. The head has index 0. Indices are modulused by the length so out-of-range
 errors can't happen. This means that negative indices are supported, e.g. -1 to get the last element.
 -}
 get : Int -> Nonempty a -> a
-get i (Nonempty x xs as ne) =
-  let j = i % (length ne)
-      find k ys =
-        case ys of
-          [] -> Debug.crash "This can't happen: attempted to take value at safe index from empty list"
-          z::zs -> if k == 0 then z else find (k-1) zs
-  in if j == 0 then x else find (j-1) xs
+get i ((Nonempty x xs) as ne) =
+  let
+    j =
+      i % (length ne)
+
+    find k ys =
+      case ys of
+        [] ->
+          Debug.crash "This can't happen: attempted to take value at safe index from empty list"
+
+        z :: zs ->
+          if k == 0 then
+            z
+          else
+            find (k - 1) zs
+  in
+    if j == 0 then
+      x
+    else
+      find (j - 1) xs
 
 
 {-| Produce a value of the nonempty list uniformly at random, and the new random seed.
 -}
-sample : Random.Seed -> Nonempty a -> (a, Random.Seed)
+sample : Random.Seed -> Nonempty a -> ( a, Random.Seed )
 sample seed nonempty =
-  let gen = Random.int 0 (length nonempty - 1)
-      (i, seed2) = Random.generate gen seed
-  in (get i nonempty, seed2)
+  let
+    gen =
+      Random.int 0 (length nonempty - 1)
+
+    ( i, seed2 ) =
+      Random.generate gen seed
+  in
+    ( get i nonempty, seed2 )
+
 
 {-| Add another element as the head of the list, pushing the previous head to the tail.
 -}
 cons : a -> Nonempty a -> Nonempty a
-cons y (Nonempty x xs) = Nonempty y (x::xs)
+cons y (Nonempty x xs) =
+  Nonempty y (x :: xs)
+
 
 {-| Infix cons. Note that you cannot use this for pattern matching. Be sure to add `exposing ((:::))` to your import.
 
     4 ::: Nonempty 3 [2,1] == Nonempty 4 [3,2,1]
 -}
 (:::) : a -> Nonempty a -> Nonempty a
-(:::) = cons
+(:::) =
+  cons
+
+
+
 -- If you're using another library that also defines (:::), the compiler may complain about this line.
 -- If so, you may comment it out in your local copy, and not use it. Everything else will still work.
 -- More info: https://github.com/elm-lang/elm-compiler/issues/1096
-infixr 5 :::
 
+
+infixr 5 :::
 {-| Append two nonempty lists together. `(++)` is _not_ supported.
 -}
 append : Nonempty a -> Nonempty a -> Nonempty a
-append (Nonempty x xs) (Nonempty y ys) = Nonempty x (xs ++ y :: ys)
+append (Nonempty x xs) (Nonempty y ys) =
+  Nonempty x (xs ++ y :: ys)
+
 
 {-| Pop and discard the head, or do nothing for a singleton list. Useful if you
 want to exhaust a list but hang on to the last item indefinitely.
@@ -121,52 +165,80 @@ want to exhaust a list but hang on to the last item indefinitely.
     pop (Nonempty 1 []) == Nonempty 1 []
 -}
 pop : Nonempty a -> Nonempty a
-pop (Nonempty x xs) = case xs of
-    [] -> Nonempty x xs
-    y::ys -> Nonempty y ys
+pop (Nonempty x xs) =
+  case xs of
+    [] ->
+      Nonempty x xs
+
+    y :: ys ->
+      Nonempty y ys
+
 
 {-| Reverse a nonempty list.
 -}
 reverse : Nonempty a -> Nonempty a
 reverse (Nonempty x xs) =
-    let revapp : (List a, a, List a) -> Nonempty a
-        revapp (ls, c, rs) = case rs of
-            [] -> Nonempty c ls
-            r::rs' -> revapp (c::ls, r, rs')
-    in revapp ([], x, xs)
+  let
+    revapp : ( List a, a, List a ) -> Nonempty a
+    revapp ( ls, c, rs ) =
+      case rs of
+        [] ->
+          Nonempty c ls
+
+        r :: rs' ->
+          revapp ( c :: ls, r, rs' )
+  in
+    revapp ( [], x, xs )
+
 
 {-| Flatten a nonempty list of nonempty lists into a single nonempty list.
 -}
 concat : Nonempty (Nonempty a) -> Nonempty a
 concat (Nonempty xs xss) =
-    let hd = head xs
-        tl = tail xs ++ List.concat (List.map toList xss)
-    in Nonempty hd tl
+  let
+    hd =
+      head xs
+
+    tl =
+      tail xs ++ List.concat (List.map toList xss)
+  in
+    Nonempty hd tl
+
 
 {-| Exchange the head element while leaving the tail alone.
 -}
 replaceHead : a -> Nonempty a -> Nonempty a
-replaceHead y (Nonempty x xs) = Nonempty y xs
+replaceHead y (Nonempty x xs) =
+  Nonempty y xs
+
 
 {-| Exchange the tail for another while leaving the head alone.
 -}
 replaceTail : List a -> Nonempty a -> Nonempty a
-replaceTail ys (Nonempty x xs) = Nonempty x ys
+replaceTail ys (Nonempty x xs) =
+  Nonempty x ys
+
 
 {-| Replace the tail with the empty list while leaving the head alone.
 -}
 dropTail : Nonempty a -> Nonempty a
-dropTail (Nonempty x xs) = Nonempty x []
+dropTail (Nonempty x xs) =
+  Nonempty x []
+
 
 {-| Map a function over a nonempty list.
 -}
 map : (a -> b) -> Nonempty a -> Nonempty b
-map f (Nonempty x xs) = Nonempty (f x) (List.map f xs)
+map f (Nonempty x xs) =
+  Nonempty (f x) (List.map f xs)
+
 
 {-| Map a function over two nonempty lists.
 -}
 map2 : (a -> b -> c) -> Nonempty a -> Nonempty b -> Nonempty c
-map2 f (Nonempty x xs) (Nonempty y ys) = Nonempty (f x y) (List.map2 f xs ys)
+map2 f (Nonempty x xs) (Nonempty y ys) =
+  Nonempty (f x y) (List.map2 f xs ys)
+
 
 {-| Map over an arbitrary number of nonempty lists.
 
@@ -174,45 +246,63 @@ map2 f (Nonempty x xs) (Nonempty y ys) = Nonempty (f x y) (List.map2 f xs ys)
     head (map (,,) xs `andMap` ys `andMap` zs) == (head xs, head ys, head zs)
 -}
 andMap : Nonempty (a -> b) -> Nonempty a -> Nonempty b
-andMap = map2 (<|)
+andMap =
+  map2 (<|)
+
 
 {-| Map a given function onto a nonempty list and flatten the resulting nonempty lists. If you're chaining, you can
 define `andThen = flip concatMap`.
 -}
 concatMap : (a -> Nonempty b) -> Nonempty a -> Nonempty b
-concatMap f xs = concat (map f xs)
+concatMap f xs =
+  concat (map f xs)
+
 
 {-| Same as `map` but the function is also applied to the index of each element (starting at zero).
 -}
 indexedMap : (Int -> a -> b) -> Nonempty a -> Nonempty b
 indexedMap f (Nonempty x xs) =
-    let wrapped i d = f (i+1) d
-    in Nonempty (f 0 x) (List.indexedMap wrapped xs)
+  let
+    wrapped i d =
+      f (i + 1) d
+  in
+    Nonempty (f 0 x) (List.indexedMap wrapped xs)
+
 
 {-| Determine if the nonempty list has exactly one element.
 -}
 isSingleton : Nonempty a -> Bool
-isSingleton (Nonempty x xs) = List.isEmpty xs
+isSingleton (Nonempty x xs) =
+  List.isEmpty xs
+
 
 {-| Find the length of the nonempty list.
 -}
 length : Nonempty a -> Int
-length (Nonempty x xs) = List.length xs + 1
+length (Nonempty x xs) =
+  List.length xs + 1
+
 
 {-| Determine if an element is present in the nonempty list.
 -}
 member : a -> Nonempty a -> Bool
-member y (Nonempty x xs) = x == y || List.member y xs
+member y (Nonempty x xs) =
+  x == y || List.member y xs
+
 
 {-| Determine if all elements satisfy the predicate.
 -}
 all : (a -> Bool) -> Nonempty a -> Bool
-all f (Nonempty x xs) = f x && List.all f xs
+all f (Nonempty x xs) =
+  f x && List.all f xs
+
 
 {-| Determine if any elements satisfy the predicate.
 -}
 any : (a -> Bool) -> Nonempty a -> Bool
-any f (Nonempty x xs) = f x || List.any f xs
+any f (Nonempty x xs) =
+  f x || List.any f xs
+
 
 {-| Filter a nonempty list. If all values are filtered out, return the singleton list containing the default value
 provided. If any value is retained, the default value is not used. If you want to deal with a Maybe instead, use
@@ -224,10 +314,16 @@ provided. If any value is retained, the default value is not used. If you want t
 -}
 filter : (a -> Bool) -> a -> Nonempty a -> Nonempty a
 filter p d (Nonempty x xs) =
-    if p x then Nonempty x (List.filter p xs)
-    else case (List.filter p xs) of
-        [] -> Nonempty d []
-        y::ys -> Nonempty y ys
+  if p x then
+    Nonempty x (List.filter p xs)
+  else
+    case (List.filter p xs) of
+      [] ->
+        Nonempty d []
+
+      y :: ys ->
+        Nonempty y ys
+
 
 {-| Remove _adjacent_ duplicate elements from the nonempty list.
 
@@ -235,13 +331,21 @@ filter p d (Nonempty x xs) =
 -}
 dedup : Nonempty a -> Nonempty a
 dedup (Nonempty x xs) =
-    let dedupe : a -> List a -> List a -> Nonempty a
-        dedupe prev done next = case next of
-            [] -> Nonempty prev done
-            y::ys -> if y == prev
-                     then dedupe prev done ys
-                     else dedupe y (prev::done) ys
-    in reverse <| dedupe x [] xs
+  let
+    dedupe : a -> List a -> List a -> Nonempty a
+    dedupe prev done next =
+      case next of
+        [] ->
+          Nonempty prev done
+
+        y :: ys ->
+          if y == prev then
+            dedupe prev done ys
+          else
+            dedupe y (prev :: done) ys
+  in
+    reverse <| dedupe x [] xs
+
 
 {-| Remove _all_ duplicate elements from the nonempty list, with the remaining elements ordered by first occurrence.
 
@@ -249,20 +353,30 @@ dedup (Nonempty x xs) =
 -}
 uniq : Nonempty a -> Nonempty a
 uniq (Nonempty x xs) =
-    let unique : List a -> Nonempty a -> List a -> Nonempty a
-        unique seen done next = case next of
-            [] -> done
-            y::ys -> if List.member y seen
-                     then unique seen done ys
-                     else unique (y::seen) (y:::done) ys
-    in reverse <| unique [x] (Nonempty x []) xs
+  let
+    unique : List a -> Nonempty a -> List a -> Nonempty a
+    unique seen done next =
+      case next of
+        [] ->
+          done
+
+        y :: ys ->
+          if List.member y seen then
+            unique seen done ys
+          else
+            unique (y :: seen) (y ::: done) ys
+  in
+    reverse <| unique [ x ] (Nonempty x []) xs
+
 
 {-| Reduce a nonempty list from the left with a base case.
 
     foldl (++) "" (Nonempty "a" ["b", "c"]) == "cba"
 -}
 foldl : (a -> b -> b) -> b -> Nonempty a -> b
-foldl f b (Nonempty x xs) = List.foldl f b (x::xs)
+foldl f b (Nonempty x xs) =
+  List.foldl f b (x :: xs)
+
 
 {-| Reduce a nonempty list from the left _without_ a base case. As per Elm convention, the first argument is the current
 element and the second argument is the accumulated value. The function is first invoked on the _second_ element, using
@@ -277,7 +391,9 @@ the first element as the accumulated value, except for singleton lists in which 
     nearest == 40
 -}
 foldl1 : (a -> a -> a) -> Nonempty a -> a
-foldl1 f (Nonempty x xs) = List.foldl f x xs
+foldl1 f (Nonempty x xs) =
+  List.foldl f x xs
+
 
 {-| Like `foldl`, but keep each intermediate value. For example, scan addition to create the cumulative sum up to each
 element. The head of the new nonempty list is always the base case provided, and the length increases by 1.
@@ -285,7 +401,9 @@ element. The head of the new nonempty list is always the base case provided, and
     scanl (++) "" (Nonempty "a" ["b", "c"]) == Nonempty "" ["a","ba","cba"]
 -}
 scanl : (a -> b -> b) -> b -> Nonempty a -> Nonempty b
-scanl f b (Nonempty x xs) = Nonempty b <| List.scanl f (f x b) xs
+scanl f b (Nonempty x xs) =
+  Nonempty b <| List.scanl f (f x b) xs
+
 
 {-| Like `foldl1`, but keep each intermediate value. The head and length are not changed.
 
@@ -298,7 +416,9 @@ function), and turns it into the number of ways to roll at least _i_ (the cumula
 -}
 scanl1 : (a -> a -> a) -> Nonempty a -> Nonempty a
 scanl1 f (Nonempty x xs) =
-    case xs of
-        [] -> Nonempty x []
-        y::ys -> Nonempty x (List.scanl f (f y x) ys)
+  case xs of
+    [] ->
+      Nonempty x []
 
+    y :: ys ->
+      Nonempty x (List.scanl f (f y x) ys)
