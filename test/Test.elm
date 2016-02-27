@@ -3,7 +3,8 @@ import Random
 import Task exposing (Task)
 
 import Check exposing (claim, that, is, true, false, for, quickCheck)
-import Check.Investigator exposing (tuple, tuple3, char, int, list, string)
+import Check.Producer exposing (tuple, tuple3, char, int, list, string)
+import Check.Test exposing (evidenceToTest)
 import ElmTest exposing (equals, elementRunner)
 import Console
 import List.Nonempty as NE exposing ((:::))
@@ -475,22 +476,6 @@ result = quickCheck testSuite
 unitSuite : ElmTest.Test
 unitSuite = ElmTest.suite "all unit tests"
     [evidenceToTest result, getSuite, dedupeSuite, uniqSuite]
-
-nChecks n = if n == 1 then "1 check" else toString n ++ " checks"
-
-evidenceToTest : Check.Evidence -> ElmTest.Test
-evidenceToTest evidence =
-  case evidence of
-    Check.Multiple name more ->
-      ElmTest.suite name (List.map evidenceToTest more)
-
-    Check.Unit (Ok {name, numberOfChecks}) ->
-      ElmTest.test (name ++ " [" ++ nChecks numberOfChecks ++ "]") ElmTest.pass
-
-    Check.Unit (Err {name, numberOfChecks, expected, actual, counterExample}) ->
-      ElmTest.test name <| ElmTest.fail <|
-        "On check " ++ toString numberOfChecks ++ ", found counterexample: " ++
-        counterExample ++ " Expected " ++ expected ++ " but got " ++ actual
 
 main = elementRunner unitSuite
 
