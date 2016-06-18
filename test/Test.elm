@@ -5,8 +5,8 @@ import Random
 import Task exposing (Task)
 import Check exposing (claim, that, is, true, false, for, quickCheck)
 import Check.Producer exposing (tuple, tuple3, char, int, list, string)
-import Check.Test exposing (evidenceToTest)
-import ElmTest exposing (equals, runSuiteHtml)
+import Legacy.Check.Test exposing (evidenceToTest)
+import Legacy.ElmTest as ElmTest exposing (equals, runSuiteHtml)
 import List.Nonempty as NE exposing ((:::))
 
 
