@@ -6,7 +6,6 @@ import Task exposing (Task)
 import Test exposing (test, fuzz, fuzz2, fuzz3, describe)
 import Test.Runner.Html
 import Assert
-import AssertExtra as Assert
 import Fuzz exposing (tuple, tuple3, char, int, list, string)
 import List.Nonempty as NE exposing ((:::))
 
@@ -27,7 +26,7 @@ testSuite =
     describe "fuzz tests"
         [ fuzz (nonemptylist int) "dropping tail makes singleton"
             <| \( x, xs ) ->
-                NE.Nonempty x xs |> NE.dropTail |> NE.isSingleton |> Assert.true
+                NE.Nonempty x xs |> NE.dropTail |> NE.isSingleton |> Assert.true "dropped tail not a singleton"
         , fuzz (nonemptylist int) "converting to and from a normal list is the identity"
             <| \( x, xs ) ->
                 NE.Nonempty x xs |> NE.toList |> NE.fromList |> Assert.equal (Just (NE.Nonempty x xs))
@@ -37,13 +36,13 @@ testSuite =
             <| \( y, ( x, xs ) ) ->
                 y ::: (NE.Nonempty x xs) |> NE.toList |> Assert.equal (y :: x :: xs)
         , fuzz int "fromElement results in a singleton"
-            <| \x -> NE.fromElement x |> NE.isSingleton |> Assert.true
+            <| \x -> NE.fromElement x |> NE.isSingleton |> Assert.true "fromElement x not a singleton"
         , fuzz (tuple ( nonemptylist int, nonemptylist int )) "append works"
             <| \( ( x, xs ), ( y, ys ) ) ->
                 NE.append (NE.Nonempty x xs) (NE.Nonempty y ys) |> NE.toList |> Assert.equal (x :: xs ++ y :: ys)
         , fuzz (tuple ( nonemptylist int, nonemptylist int )) "append never results in a singleton"
             <| \( ( x, xs ), ( y, ys ) ) ->
-                NE.append (NE.Nonempty x xs) (NE.Nonempty y ys) |> NE.isSingleton |> Assert.false
+                NE.append (NE.Nonempty x xs) (NE.Nonempty y ys) |> NE.isSingleton |> Assert.false "got a singleton"
         , fuzz (nonemptylist int) "get 0 == head"
             <| \( x, xs ) ->
                 NE.Nonempty x xs |> NE.get 0 |> Assert.equal x
@@ -65,10 +64,10 @@ testSuite =
             <| \xs ->
                 case NE.fromList xs of
                     Just _ ->
-                        List.isEmpty xs |> Assert.false
+                        List.isEmpty xs |> Assert.false "fromList made Just x from an empty list"
 
                     Nothing ->
-                        List.isEmpty xs |> Assert.true
+                        List.isEmpty xs |> Assert.true "fromList made Nothing from a nonempty list"
         , fuzz (nonemptylist int) "map then toList == List.map"
             <| \( x, xs ) ->
                 NE.Nonempty x xs
@@ -136,7 +135,7 @@ testSuite =
                     ::: NE.Nonempty x xs
                     |> Assert.notEqual (NE.Nonempty x xs)
         , fuzz (nonemptylist int) "Lists with unequal heads equate false"
-            <| \( x, xs ) -> NE.Nonempty x xs == NE.Nonempty (x + 1) xs |> Assert.false
+            <| \( x, xs ) -> NE.Nonempty x xs == NE.Nonempty (x + 1) xs |> Assert.false "lists were equal"
         , fuzz (nonemptylist int) "popping reduces the length by 1 except for singleton lists"
             <| \( x, xs ) ->
                 let
@@ -146,7 +145,7 @@ testSuite =
                     lengthReduced =
                         (NE.length ys) - 1 == NE.length (NE.pop ys)
                 in
-                    Assert.true <| lengthReduced `xor` NE.isSingleton ys
+                    Assert.true "popping not working correctly" <| lengthReduced `xor` NE.isSingleton ys
         , fuzz (nonemptylist int) "pop xs == tail xs except for singleton lists"
             <| \( x, xs ) ->
                 let
@@ -156,7 +155,7 @@ testSuite =
                     tailEquals =
                         NE.toList (NE.pop ys) == xs
                 in
-                    Assert.true <| tailEquals || NE.isSingleton ys
+                    Assert.true "popping not working correctly" <| tailEquals || NE.isSingleton ys
         , fuzz (nonemptylist int) "reversing twice is the identity"
             <| \( x, xs ) ->
                 let
@@ -281,7 +280,7 @@ testSuite =
                         List.map2 (,) (NE.toList counts) (NE.tail counts)
                             |> List.map (\( a, b ) -> a <= b)
                             |> List.all identity
-                            |> Assert.true
+                            |> Assert.true "length decreased at least once"
             , fuzz (nonemptylist string) "scanl1 does not change the head"
                 <| \( x, xs ) ->
                     NE.Nonempty x xs
