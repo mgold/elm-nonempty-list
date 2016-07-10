@@ -5,7 +5,7 @@ import Random
 import Task exposing (Task)
 import Test exposing (test, fuzz, fuzz2, fuzz3, describe)
 import Test.Runner.Html
-import Assert
+import Expect
 import Fuzz exposing (tuple, tuple3, char, int, list, string)
 import List.Nonempty as NE exposing ((:::))
 
@@ -26,28 +26,28 @@ testSuite =
     describe "fuzz tests"
         [ fuzz (nonemptylist int) "dropping tail makes singleton"
             <| \( x, xs ) ->
-                NE.Nonempty x xs |> NE.dropTail |> NE.isSingleton |> Assert.true "dropped tail not a singleton"
+                NE.Nonempty x xs |> NE.dropTail |> NE.isSingleton |> Expect.true "dropped tail not a singleton"
         , fuzz (nonemptylist int) "converting to and from a normal list is the identity"
             <| \( x, xs ) ->
-                NE.Nonempty x xs |> NE.toList |> NE.fromList |> Assert.equal (Just (NE.Nonempty x xs))
+                NE.Nonempty x xs |> NE.toList |> NE.fromList |> Expect.equal (Just (NE.Nonempty x xs))
         , fuzz (nonemptylist int) "length is 1 more than `length tail`"
-            <| \( x, xs ) -> NE.Nonempty x xs |> NE.length |> Assert.equal (List.length xs + 1)
+            <| \( x, xs ) -> NE.Nonempty x xs |> NE.length |> Expect.equal (List.length xs + 1)
         , fuzz (tuple ( int, nonemptylist int )) "cons works"
             <| \( y, ( x, xs ) ) ->
-                y ::: (NE.Nonempty x xs) |> NE.toList |> Assert.equal (y :: x :: xs)
+                y ::: (NE.Nonempty x xs) |> NE.toList |> Expect.equal (y :: x :: xs)
         , fuzz int "fromElement results in a singleton"
-            <| \x -> NE.fromElement x |> NE.isSingleton |> Assert.true "fromElement x not a singleton"
+            <| \x -> NE.fromElement x |> NE.isSingleton |> Expect.true "fromElement x not a singleton"
         , fuzz (tuple ( nonemptylist int, nonemptylist int )) "append works"
             <| \( ( x, xs ), ( y, ys ) ) ->
-                NE.append (NE.Nonempty x xs) (NE.Nonempty y ys) |> NE.toList |> Assert.equal (x :: xs ++ y :: ys)
+                NE.append (NE.Nonempty x xs) (NE.Nonempty y ys) |> NE.toList |> Expect.equal (x :: xs ++ y :: ys)
         , fuzz (tuple ( nonemptylist int, nonemptylist int )) "append never results in a singleton"
             <| \( ( x, xs ), ( y, ys ) ) ->
-                NE.append (NE.Nonempty x xs) (NE.Nonempty y ys) |> NE.isSingleton |> Assert.false "got a singleton"
+                NE.append (NE.Nonempty x xs) (NE.Nonempty y ys) |> NE.isSingleton |> Expect.false "got a singleton"
         , fuzz (nonemptylist int) "get 0 == head"
             <| \( x, xs ) ->
-                NE.Nonempty x xs |> NE.get 0 |> Assert.equal x
+                NE.Nonempty x xs |> NE.get 0 |> Expect.equal x
         , fuzz2 int int "getting any index from singleton produces the value"
-            <| \x i -> NE.fromElement x |> NE.get i |> Assert.equal x
+            <| \x i -> NE.fromElement x |> NE.get i |> Expect.equal x
         , fuzz int "sample will eventually produce every element"
             <| \i ->
                 let
@@ -59,25 +59,25 @@ testSuite =
                         |> NE.fromList
                         |> Maybe.map NE.uniq
                         |> Maybe.map (\ne -> NE.length ne == 6)
-                        |> Assert.equal (Just True)
+                        |> Expect.equal (Just True)
         , fuzz (list int) "fromList fails only for the empty List"
             <| \xs ->
                 case NE.fromList xs of
                     Just _ ->
-                        List.isEmpty xs |> Assert.false "fromList made Just x from an empty list"
+                        List.isEmpty xs |> Expect.false "fromList made Just x from an empty list"
 
                     Nothing ->
-                        List.isEmpty xs |> Assert.true "fromList made Nothing from a nonempty list"
+                        List.isEmpty xs |> Expect.true "fromList made Nothing from a nonempty list"
         , fuzz (nonemptylist int) "map then toList == List.map"
             <| \( x, xs ) ->
                 NE.Nonempty x xs
                     |> NE.map f
                     |> NE.toList
-                    |> Assert.equal (List.map f (x :: xs))
+                    |> Expect.equal (List.map f (x :: xs))
         , fuzz (tuple ( nonemptylist int, nonemptylist string )) "length (map2 (,) xs ys) == min (length xs) (length ys)"
             <| \( ( x, xs ), ( y, ys ) ) ->
                 NE.length (NE.map2 (,) (NE.Nonempty x xs) (NE.Nonempty y ys))
-                    |> Assert.equal (1 + min (List.length xs) (List.length ys))
+                    |> Expect.equal (1 + min (List.length xs) (List.length ys))
         , fuzz (tuple ( nonemptylist int, nonemptylist string ))
             "map2 (,) xs ys == map (,) xs `andMap` ys "
             <| \( ( x, xs ), ( y, ys ) ) ->
@@ -88,7 +88,7 @@ testSuite =
                     actual =
                         NE.map (,) (NE.Nonempty x xs) `NE.andMap` (NE.Nonempty y ys)
                 in
-                    Assert.equal expected actual
+                    Expect.equal expected actual
         , fuzz3 (nonemptylist int) (nonemptylist string) (nonemptylist char) "head (map (,,) xs `andMap` ys `andMap` zs) == (head xs, head ys, head zs)"
             <| \( x, xs ) ( y, ys ) ( z, zs ) ->
                 NE.map (,,) (NE.Nonempty x xs)
@@ -97,23 +97,23 @@ testSuite =
                                     zs
                                 )
                     |> NE.head
-                    |> Assert.equal ( x, y, z )
+                    |> Expect.equal ( x, y, z )
         , fuzz (nonemptylist int) "concatMap works the same as for a list"
             <| \( x, xs ) ->
                 NE.concatMap (\x -> NE.Nonempty x [ f x ]) (NE.Nonempty x xs)
                     |> NE.toList
-                    |> Assert.equal (List.concatMap (\x -> [ x, f x ]) (x :: xs))
+                    |> Expect.equal (List.concatMap (\x -> [ x, f x ]) (x :: xs))
         , fuzz (nonemptylist int) "indexedMap works the same as for a list"
             <| \( x, xs ) ->
                 NE.indexedMap (,) (NE.Nonempty x xs)
                     |> NE.toList
-                    |> Assert.equal (List.indexedMap (,) (x :: xs))
+                    |> Expect.equal (List.indexedMap (,) (x :: xs))
         , fuzz (nonemptylist int) "filter works"
             <| \( x, xs ) ->
                 NE.Nonempty x xs
                     |> NE.filter isEven -99
                     |> NE.toList
-                    |> Assert.equal
+                    |> Expect.equal
                         (let
                             filtered =
                                 List.filter isEven (x :: xs)
@@ -124,18 +124,18 @@ testSuite =
                                 filtered
                         )
         , fuzz2 (nonemptylist int) int "Filtering everything out results in the default value"
-            <| \( x, xs ) d -> NE.Nonempty x xs |> NE.filter (always False) d |> NE.toList |> Assert.equal [ d ]
+            <| \( x, xs ) d -> NE.Nonempty x xs |> NE.filter (always False) d |> NE.toList |> Expect.equal [ d ]
         , fuzz2 (nonemptylist int) int "Filtering nothing out is the identity"
-            <| \( x, xs ) d -> NE.Nonempty x xs |> NE.filter (always True) d |> Assert.equal (NE.Nonempty x xs)
+            <| \( x, xs ) d -> NE.Nonempty x xs |> NE.filter (always True) d |> Expect.equal (NE.Nonempty x xs)
         , fuzz (nonemptylist int) "Equal lists equate true"
-            <| \( x, xs ) -> NE.Nonempty x xs |> Assert.equal (NE.map identity (NE.Nonempty x xs))
+            <| \( x, xs ) -> NE.Nonempty x xs |> Expect.equal (NE.map identity (NE.Nonempty x xs))
         , fuzz2 (nonemptylist int) int "Lists of nonequal length equate false"
             <| \( x, xs ) d ->
                 d
                     ::: NE.Nonempty x xs
-                    |> Assert.notEqual (NE.Nonempty x xs)
+                    |> Expect.notEqual (NE.Nonempty x xs)
         , fuzz (nonemptylist int) "Lists with unequal heads equate false"
-            <| \( x, xs ) -> NE.Nonempty x xs == NE.Nonempty (x + 1) xs |> Assert.false "lists were equal"
+            <| \( x, xs ) -> NE.Nonempty x xs == NE.Nonempty (x + 1) xs |> Expect.false "lists were equal"
         , fuzz (nonemptylist int) "popping reduces the length by 1 except for singleton lists"
             <| \( x, xs ) ->
                 let
@@ -145,7 +145,7 @@ testSuite =
                     lengthReduced =
                         (NE.length ys) - 1 == NE.length (NE.pop ys)
                 in
-                    Assert.true "popping not working correctly" <| lengthReduced `xor` NE.isSingleton ys
+                    Expect.true "popping not working correctly" <| lengthReduced `xor` NE.isSingleton ys
         , fuzz (nonemptylist int) "pop xs == tail xs except for singleton lists"
             <| \( x, xs ) ->
                 let
@@ -155,26 +155,26 @@ testSuite =
                     tailEquals =
                         NE.toList (NE.pop ys) == xs
                 in
-                    Assert.true "popping not working correctly" <| tailEquals || NE.isSingleton ys
+                    Expect.true "popping not working correctly" <| tailEquals || NE.isSingleton ys
         , fuzz (nonemptylist int) "reversing twice is the identity"
             <| \( x, xs ) ->
                 let
                     ys =
                         NE.Nonempty x xs
                 in
-                    NE.reverse (NE.reverse ys) |> Assert.equal ys
+                    NE.reverse (NE.reverse ys) |> Expect.equal ys
         , fuzz (nonemptylist int) "reversing is equal to the ordinary list reverse"
             <| \( x, xs ) ->
                 NE.Nonempty x xs
                     |> NE.reverse
                     |> NE.toList
-                    |> Assert.equal (List.reverse (x :: xs))
+                    |> Expect.equal (List.reverse (x :: xs))
         , fuzz3 (list int) int (list int) "replaceTail is equal to doing so with an ordinary list"
             <| \ys x xs ->
                 NE.Nonempty x xs
                     |> NE.replaceTail ys
                     |> NE.toList
-                    |> Assert.equal (x :: ys)
+                    |> Expect.equal (x :: ys)
         , fuzz (nonemptylist (nonemptylist int))
             "concat is equal to doing so with an ordinary list"
             <| \( ( x, xs ), ys ) ->
@@ -189,30 +189,30 @@ testSuite =
                     expected =
                         List.concat ((x :: xs) :: ys')
                 in
-                    NE.concat zs |> NE.toList |> Assert.equal expected
+                    NE.concat zs |> NE.toList |> Expect.equal expected
         , fuzz3 int (list int) int "member checks the head and the tail"
             <| \x xs y ->
                 let
                     expected =
                         x == y || List.member y xs
                 in
-                    NE.Nonempty x xs |> NE.member y |> Assert.equal expected
+                    NE.Nonempty x xs |> NE.member y |> Expect.equal expected
         , fuzz (nonemptylist string) "foldl is the same as for a list"
             <| \( x, xs ) ->
                 NE.Nonempty x xs
                     |> NE.foldl (++) ""
-                    |> Assert.equal (List.foldl (++) "" (x :: xs))
+                    |> Expect.equal (List.foldl (++) "" (x :: xs))
         , fuzz (nonemptylist string) "foldl1 is the same as for a list"
             <| \( x, xs ) ->
                 NE.Nonempty x xs
                     |> NE.foldl1 (++)
-                    |> Assert.equal (List.foldl (++) "" (x :: xs))
+                    |> Expect.equal (List.foldl (++) "" (x :: xs))
         , fuzz (nonemptylist string) "sort is the same as for a list"
             <| \( x, xs ) ->
                 NE.Nonempty x xs
                     |> NE.sort
                     |> NE.toList
-                    |> Assert.equal (List.sort (x :: xs))
+                    |> Expect.equal (List.sort (x :: xs))
         , fuzz (nonemptylist string) "sortBy is the same as for a list"
             <| \( x, xs ) ->
                 let
@@ -223,26 +223,26 @@ testSuite =
                         |> NE.map (\s -> { name = s })
                         |> NE.sortBy .name
                         |> NE.toList
-                        |> Assert.equal expected
+                        |> Expect.equal expected
         , fuzz (nonemptylist string) "sortWith is the same as for a list"
             <| \( x, xs ) ->
                 NE.Nonempty x xs
                     |> NE.sortWith compare
                     |> NE.toList
-                    |> Assert.equal (List.sortWith compare (x :: xs))
+                    |> Expect.equal (List.sortWith compare (x :: xs))
         , describe "scanning"
             [ fuzz (nonemptylist string) "scanl is the same as for a list"
                 <| \( x, xs ) ->
                     NE.Nonempty x xs
                         |> NE.scanl (++) ""
                         |> NE.toList
-                        |> Assert.equal (List.scanl (++) "" (x :: xs))
+                        |> Expect.equal (List.scanl (++) "" (x :: xs))
             , fuzz (nonemptylist string) "The head of the result of scanl is the base case"
                 <| \( x, xs ) ->
                     NE.Nonempty x xs
                         |> NE.scanl (++) ""
                         |> NE.head
-                        |> Assert.equal ""
+                        |> Expect.equal ""
             , fuzz (nonemptylist string) "The tail of the result of scanl is the result of scanl1"
                 <| \( x, xs ) ->
                     let
@@ -256,19 +256,19 @@ testSuite =
                             NE.scanl1 (++) ys
                     in
                         NE.tail scanned
-                            |> Assert.equal (NE.toList scanned1)
+                            |> Expect.equal (NE.toList scanned1)
             , fuzz (nonemptylist int) "scanl adds 1 to the length"
                 <| \( x, xs ) ->
                     NE.Nonempty x xs
                         |> NE.scanl (+) 0
                         |> NE.length
-                        |> Assert.equal (2 + List.length xs)
+                        |> Expect.equal (2 + List.length xs)
             , fuzz (nonemptylist int) "scanl1 does not change the length"
                 <| \( x, xs ) ->
                     NE.Nonempty x xs
                         |> NE.scanl1 (+)
                         |> NE.length
-                        |> Assert.equal (1 + List.length xs)
+                        |> Expect.equal (1 + List.length xs)
             , fuzz (nonemptylist string) "scanl with string concatenation never decreases the length"
                 <| \( x, xs ) ->
                     let
@@ -280,13 +280,13 @@ testSuite =
                         List.map2 (,) (NE.toList counts) (NE.tail counts)
                             |> List.map (\( a, b ) -> a <= b)
                             |> List.all identity
-                            |> Assert.true "length decreased at least once"
+                            |> Expect.true "length decreased at least once"
             , fuzz (nonemptylist string) "scanl1 does not change the head"
                 <| \( x, xs ) ->
                     NE.Nonempty x xs
                         |> NE.scanl1 (++)
                         |> NE.head
-                        |> Assert.equal x
+                        |> Expect.equal x
             ]
         ]
 
@@ -297,16 +297,16 @@ dedupeSuite =
             NE.Nonempty x xs |> NE.dedup |> NE.toList
     in
         describe "deduplication"
-            [ test "" <| \_ -> mk 1 [] |> Assert.equal [ 1 ]
-            , test "" <| \_ -> mk 1 [ 2 ] |> Assert.equal [ 1, 2 ]
-            , test "" <| \_ -> mk 1 [ 2, 2 ] |> Assert.equal [ 1, 2 ]
-            , test "" <| \_ -> mk 1 [ 1, 2 ] |> Assert.equal [ 1, 2 ]
-            , test "" <| \_ -> mk 1 [ 1, 2, 2, 1 ] |> Assert.equal [ 1, 2, 1 ]
-            , test "" <| \_ -> mk 1 [ 1, 2, 2, 2, 2, 2, 1 ] |> Assert.equal [ 1, 2, 1 ]
-            , test "" <| \_ -> mk 1 [ 1, 2, 2, 3, 4, 4, 5 ] |> Assert.equal [ 1, 2, 3, 4, 5 ]
-            , test "" <| \_ -> mk 1 [ 1, 2, 2, 3, 2, 2, 1, 1 ] |> Assert.equal [ 1, 2, 3, 2, 1 ]
-            , test "" <| \_ -> mk 1 [1..4] |> Assert.equal [1..4]
-            , test "" <| \_ -> mk 3 [1..3] |> Assert.equal [ 3, 1, 2, 3 ]
+            [ test "" <| \_ -> mk 1 [] |> Expect.equal [ 1 ]
+            , test "" <| \_ -> mk 1 [ 2 ] |> Expect.equal [ 1, 2 ]
+            , test "" <| \_ -> mk 1 [ 2, 2 ] |> Expect.equal [ 1, 2 ]
+            , test "" <| \_ -> mk 1 [ 1, 2 ] |> Expect.equal [ 1, 2 ]
+            , test "" <| \_ -> mk 1 [ 1, 2, 2, 1 ] |> Expect.equal [ 1, 2, 1 ]
+            , test "" <| \_ -> mk 1 [ 1, 2, 2, 2, 2, 2, 1 ] |> Expect.equal [ 1, 2, 1 ]
+            , test "" <| \_ -> mk 1 [ 1, 2, 2, 3, 4, 4, 5 ] |> Expect.equal [ 1, 2, 3, 4, 5 ]
+            , test "" <| \_ -> mk 1 [ 1, 2, 2, 3, 2, 2, 1, 1 ] |> Expect.equal [ 1, 2, 3, 2, 1 ]
+            , test "" <| \_ -> mk 1 [1..4] |> Expect.equal [1..4]
+            , test "" <| \_ -> mk 3 [1..3] |> Expect.equal [ 3, 1, 2, 3 ]
             ]
 
 
@@ -316,16 +316,16 @@ uniqSuite =
             NE.Nonempty x xs |> NE.uniq |> NE.toList
     in
         describe "uniq"
-            [ test "" <| \_ -> mk 1 [] |> Assert.equal [ 1 ]
-            , test "" <| \_ -> mk 1 [ 2 ] |> Assert.equal [ 1, 2 ]
-            , test "" <| \_ -> mk 1 [ 2, 2 ] |> Assert.equal [ 1, 2 ]
-            , test "" <| \_ -> mk 1 [ 1, 2 ] |> Assert.equal [ 1, 2 ]
-            , test "" <| \_ -> mk 1 [ 1, 2, 2, 1 ] |> Assert.equal [ 1, 2 ]
-            , test "" <| \_ -> mk 1 [ 1, 2, 2, 2, 2, 2, 1 ] |> Assert.equal [ 1, 2 ]
-            , test "" <| \_ -> mk 1 [ 1, 2, 2, 3, 4, 4, 5 ] |> Assert.equal [ 1, 2, 3, 4, 5 ]
-            , test "" <| \_ -> mk 1 [ 1, 2, 2, 3, 2, 2, 1, 1 ] |> Assert.equal [ 1, 2, 3 ]
-            , test "" <| \_ -> mk 1 [1..4] |> Assert.equal [1..4]
-            , test "" <| \_ -> mk 3 [1..3] |> Assert.equal [ 3, 1, 2 ]
+            [ test "" <| \_ -> mk 1 [] |> Expect.equal [ 1 ]
+            , test "" <| \_ -> mk 1 [ 2 ] |> Expect.equal [ 1, 2 ]
+            , test "" <| \_ -> mk 1 [ 2, 2 ] |> Expect.equal [ 1, 2 ]
+            , test "" <| \_ -> mk 1 [ 1, 2 ] |> Expect.equal [ 1, 2 ]
+            , test "" <| \_ -> mk 1 [ 1, 2, 2, 1 ] |> Expect.equal [ 1, 2 ]
+            , test "" <| \_ -> mk 1 [ 1, 2, 2, 2, 2, 2, 1 ] |> Expect.equal [ 1, 2 ]
+            , test "" <| \_ -> mk 1 [ 1, 2, 2, 3, 4, 4, 5 ] |> Expect.equal [ 1, 2, 3, 4, 5 ]
+            , test "" <| \_ -> mk 1 [ 1, 2, 2, 3, 2, 2, 1, 1 ] |> Expect.equal [ 1, 2, 3 ]
+            , test "" <| \_ -> mk 1 [1..4] |> Expect.equal [1..4]
+            , test "" <| \_ -> mk 3 [1..3] |> Expect.equal [ 3, 1, 2 ]
             ]
 
 
@@ -335,14 +335,14 @@ getSuite =
             NE.Nonempty 10 [ 11, 12 ]
     in
         describe "get"
-            [ test "" <| \_ -> NE.get -4 xs |> Assert.equal 12
-            , test "" <| \_ -> NE.get -3 xs |> Assert.equal 10
-            , test "" <| \_ -> NE.get -2 xs |> Assert.equal 11
-            , test "" <| \_ -> NE.get -1 xs |> Assert.equal 12
-            , test "" <| \_ -> NE.get 0 xs |> Assert.equal 10
-            , test "" <| \_ -> NE.get 1 xs |> Assert.equal 11
-            , test "" <| \_ -> NE.get 2 xs |> Assert.equal 12
-            , test "" <| \_ -> NE.get 3 xs |> Assert.equal 10
+            [ test "" <| \_ -> NE.get -4 xs |> Expect.equal 12
+            , test "" <| \_ -> NE.get -3 xs |> Expect.equal 10
+            , test "" <| \_ -> NE.get -2 xs |> Expect.equal 11
+            , test "" <| \_ -> NE.get -1 xs |> Expect.equal 12
+            , test "" <| \_ -> NE.get 0 xs |> Expect.equal 10
+            , test "" <| \_ -> NE.get 1 xs |> Expect.equal 11
+            , test "" <| \_ -> NE.get 2 xs |> Expect.equal 12
+            , test "" <| \_ -> NE.get 3 xs |> Expect.equal 10
             ]
 
 
