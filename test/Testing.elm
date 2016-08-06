@@ -32,8 +32,8 @@ testSuite =
                 NE.Nonempty x xs |> NE.toList |> NE.fromList |> Expect.equal (Just (NE.Nonempty x xs))
         , fuzz (nonemptylist int) "length is 1 more than `length tail`" <|
             \( x, xs ) -> NE.Nonempty x xs |> NE.length |> Expect.equal (List.length xs + 1)
-        , fuzz (tuple ( int, nonemptylist int )) "cons works" <|
-            \( y, ( x, xs ) ) ->
+        , fuzz2 int (nonemptylist int) "cons works" <|
+            \y ( x, xs ) ->
                 y ::: (NE.Nonempty x xs) |> NE.toList |> Expect.equal (y :: x :: xs)
         , fuzz int "fromElement results in a singleton" <|
             \x -> NE.fromElement x |> NE.isSingleton |> Expect.true "fromElement x not a singleton"
@@ -133,8 +133,7 @@ testSuite =
             \( x, xs ) -> NE.Nonempty x xs |> Expect.equal (NE.map identity (NE.Nonempty x xs))
         , fuzz2 (nonemptylist int) int "Lists of nonequal length equate false" <|
             \( x, xs ) d ->
-                d
-                    ::: NE.Nonempty x xs
+                NE.Nonempty d (x :: xs)
                     |> Expect.notEqual (NE.Nonempty x xs)
         , fuzz (nonemptylist int) "Lists with unequal heads equate false" <|
             \( x, xs ) -> NE.Nonempty x xs == NE.Nonempty (x + 1) xs |> Expect.false "lists were equal"
