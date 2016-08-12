@@ -1,4 +1,5 @@
 # List.Nonempty for Elm
+[![Build Status](https://travis-ci.org/mgold/elm-nonempty-list.svg?branch=master)](https://travis-ci.org/mgold/elm-nonempty-list)
 
 A list that is known, at compile-time, to be nonempty. This means `head` and `tail` are guaranteed to succeed and you don't have to carry Maybes throughout your program.
 
