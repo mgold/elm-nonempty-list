@@ -1,10 +1,9 @@
-module Testing exposing (..)
+module Tests exposing (..)
 
 import String
 import Random
 import Task exposing (Task)
-import Test exposing (test, fuzz, fuzz2, fuzz3, describe)
-import Test.Runner.Html
+import Test exposing (Test, test, fuzz, fuzz2, fuzz3, describe)
 import Expect
 import Fuzz exposing (tuple, tuple3, char, int, list, string)
 import List.Nonempty as NE exposing ((:::))
@@ -348,7 +347,7 @@ getSuite =
             ]
 
 
-main =
-    Test.Runner.Html.run <|
-        describe "all tests"
-            [ testSuite, getSuite, dedupeSuite, uniqSuite ]
+all : Test
+all =
+    describe "All Nonempty List tests"
+        [ testSuite, getSuite, dedupeSuite, uniqSuite ]

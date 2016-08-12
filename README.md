@@ -18,9 +18,10 @@ foldl1 (+) two == 6
 For actual usage, I recommend `import List.Nonempty as NE exposing (Nonempty, (:::))` to import the type and infix cons.
 
 ## Testing
-`cd test; sh run-tests.sh`
-
-Thanks to all the work that went into property-based testing, even if it's overkill for this tiny library.
+```
+npm install -g elm-test
+elm test # From project root. Will require downloading packages on the first run.
+```
 
 ## Upgrading
 
