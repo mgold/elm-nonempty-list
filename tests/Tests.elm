@@ -51,7 +51,7 @@ testSuite =
             \i ->
                 let
                     gen =
-                        NE.sample (NE.Nonempty 1 [ 2, 3, 4, 5, 6 ]) |> Random.list 50
+                        NE.sample (NE.Nonempty 1 [ 2, 3, 4, 5, 6 ]) |> Random.list 80
                 in
                     Random.step gen (Random.initialSeed i)
                         |> fst
