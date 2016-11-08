@@ -184,8 +184,8 @@ reverse (Nonempty x xs) =
                 [] ->
                     Nonempty c ls
 
-                r :: rs' ->
-                    revapp ( c :: ls, r, rs' )
+                r :: rss ->
+                    revapp ( c :: ls, r, rss )
     in
         revapp ( [], x, xs )
 
@@ -241,12 +241,12 @@ map2 f (Nonempty x xs) (Nonempty y ys) =
 
 {-| Map over an arbitrary number of nonempty lists.
 
-    map2 (,) xs ys == map (,) xs `andMap` ys
-    head (map (,,) xs `andMap` ys `andMap` zs) == (head xs, head ys, head zs)
+    map2 (,) xs ys == map (,) xs  |> andMap ys
+    head (map (,,) xs |> andMap ys |> andMap zs) == (head xs, head ys, head zs)
 -}
-andMap : Nonempty (a -> b) -> Nonempty a -> Nonempty b
+andMap : Nonempty a -> Nonempty (a -> b) -> Nonempty b
 andMap =
-    map2 (<|)
+    map2 (|>)
 
 
 {-| Map a given function onto a nonempty list and flatten the resulting nonempty lists. If you're chaining, you can
