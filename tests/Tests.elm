@@ -54,7 +54,7 @@ testSuite =
                         NE.sample (NE.Nonempty 1 [ 2, 3, 4, 5, 6 ]) |> Random.list 80
                 in
                     Random.step gen (Random.initialSeed i)
-                        |> fst
+                        |> Tuple.first
                         |> NE.fromList
                         |> Maybe.map NE.uniq
                         |> Maybe.map (\ne -> NE.length ne == 6)
@@ -78,7 +78,7 @@ testSuite =
                 NE.length (NE.map2 (,) (NE.Nonempty x xs) (NE.Nonempty y ys))
                     |> Expect.equal (1 + min (List.length xs) (List.length ys))
         , fuzz (tuple ( nonemptylist int, nonemptylist string ))
-            "map2 (,) xs ys == map (,) xs `andMap` ys "
+            "map2 (,) xs ys == map (,) xs  |> andMap ys"
           <|
             \( ( x, xs ), ( y, ys ) ) ->
                 let
@@ -86,17 +86,14 @@ testSuite =
                         NE.map2 (,) (NE.Nonempty x xs) (NE.Nonempty y ys)
 
                     actual =
-                        NE.map (,) (NE.Nonempty x xs) `NE.andMap` (NE.Nonempty y ys)
+                        NE.map (,) (NE.Nonempty x xs) |> NE.andMap (NE.Nonempty y ys)
                 in
                     Expect.equal expected actual
-        , fuzz3 (nonemptylist int) (nonemptylist string) (nonemptylist char) "head (map (,,) xs `andMap` ys `andMap` zs) == (head xs, head ys, head zs)" <|
+        , fuzz3 (nonemptylist int) (nonemptylist string) (nonemptylist char) "head (map (,,) xs |> andMap ys |> andMap zs) == (head xs, head ys, head zs)" <|
             \( x, xs ) ( y, ys ) ( z, zs ) ->
                 NE.map (,,) (NE.Nonempty x xs)
-                    `NE.andMap` (NE.Nonempty y ys)
-                    `NE.andMap`
-                        (NE.Nonempty z
-                            zs
-                        )
+                    |> NE.andMap (NE.Nonempty y ys)
+                    |> NE.andMap (NE.Nonempty z zs)
                     |> NE.head
                     |> Expect.equal ( x, y, z )
         , fuzz (nonemptylist int) "concatMap works the same as for a list" <|
@@ -145,7 +142,7 @@ testSuite =
                     lengthReduced =
                         (NE.length ys) - 1 == NE.length (NE.pop ys)
                 in
-                    Expect.true "popping not working correctly" <| lengthReduced `xor` NE.isSingleton ys
+                    Expect.true "popping not working correctly" <| xor lengthReduced (NE.isSingleton ys)
         , fuzz (nonemptylist int) "pop xs == tail xs except for singleton lists" <|
             \( x, xs ) ->
                 let
@@ -184,11 +181,11 @@ testSuite =
                     zs =
                         NE.Nonempty (NE.Nonempty x xs) (List.map (uncurry NE.Nonempty) ys)
 
-                    ys' =
+                    ys_ =
                         List.map (uncurry (::)) ys
 
                     expected =
-                        List.concat ((x :: xs) :: ys')
+                        List.concat ((x :: xs) :: ys_)
                 in
                     NE.concat zs |> NE.toList |> Expect.equal expected
         , fuzz3 int (list int) int "member checks the head and the tail" <|
@@ -306,8 +303,8 @@ dedupeSuite =
             , test "" <| \_ -> mk 1 [ 1, 2, 2, 2, 2, 2, 1 ] |> Expect.equal [ 1, 2, 1 ]
             , test "" <| \_ -> mk 1 [ 1, 2, 2, 3, 4, 4, 5 ] |> Expect.equal [ 1, 2, 3, 4, 5 ]
             , test "" <| \_ -> mk 1 [ 1, 2, 2, 3, 2, 2, 1, 1 ] |> Expect.equal [ 1, 2, 3, 2, 1 ]
-            , test "" <| \_ -> mk 1 [1..4] |> Expect.equal [1..4]
-            , test "" <| \_ -> mk 3 [1..3] |> Expect.equal [ 3, 1, 2, 3 ]
+            , test "" <| \_ -> mk 1 (List.range 1 4) |> Expect.equal (List.range 1 4)
+            , test "" <| \_ -> mk 3 (List.range 1 3) |> Expect.equal [ 3, 1, 2, 3 ]
             ]
 
 
@@ -325,8 +322,8 @@ uniqSuite =
             , test "" <| \_ -> mk 1 [ 1, 2, 2, 2, 2, 2, 1 ] |> Expect.equal [ 1, 2 ]
             , test "" <| \_ -> mk 1 [ 1, 2, 2, 3, 4, 4, 5 ] |> Expect.equal [ 1, 2, 3, 4, 5 ]
             , test "" <| \_ -> mk 1 [ 1, 2, 2, 3, 2, 2, 1, 1 ] |> Expect.equal [ 1, 2, 3 ]
-            , test "" <| \_ -> mk 1 [1..4] |> Expect.equal [1..4]
-            , test "" <| \_ -> mk 3 [1..3] |> Expect.equal [ 3, 1, 2 ]
+            , test "" <| \_ -> mk 1 (List.range 1 4) |> Expect.equal (List.range 1 4)
+            , test "" <| \_ -> mk 3 (List.range 1 3) |> Expect.equal [ 3, 1, 2 ]
             ]
 
 

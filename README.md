@@ -26,4 +26,6 @@ elm test # From project root. Will require downloading packages on the first run
 
 ## Upgrading
 
+The only breaking change from 2.x to 3.0.0 is that `andMap` has arguments reversed to allow chaining with `|>` instead of backticks.
+
 The only breaking change from 1.x to 2.0.0 is that `sample` returns a generator rather than managing seeds.
