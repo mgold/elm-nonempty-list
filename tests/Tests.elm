@@ -344,7 +344,44 @@ getSuite =
             ]
 
 
+groupSuite =
+    let
+        groupWhile f xs =
+            NE.groupWhile f xs
+                |> NE.toList
+                |> List.map NE.toList
+
+        xs1 =
+            NE.Nonempty ( 0, 'a' ) [ ( 0, 'b' ), ( 1, 'c' ), ( 1, 'd' ) ]
+
+        xs2 =
+            NE.Nonempty 1 [ 2, 3, 2, 4, 1, 3, 2, 1 ]
+    in
+        describe "group"
+            [ test "" <|
+                \_ ->
+                    groupWhile (\x y -> Tuple.first x == Tuple.first y) xs1
+                        |> Expect.equal [ [ ( 0, 'a' ), ( 0, 'b' ) ], [ ( 1, 'c' ), ( 1, 'd' ) ] ]
+            , test "" <|
+                \_ ->
+                    groupWhile (<) xs2
+                        |> Expect.equal [ [ 1 ], [ 2 ], [ 3, 2 ], [ 4, 1 ], [ 3, 2, 1 ] ]
+            , test "A single element should become nested." <|
+                \_ ->
+                    groupWhile (==) (NE.Nonempty 1 [])
+                        |> Expect.equal [ [ 1 ] ]
+            , test "Two adjacent like elements should be grouped together." <|
+                \_ ->
+                    groupWhile (==) (NE.Nonempty 1 [ 1 ])
+                        |> Expect.equal [ [ 1, 1 ] ]
+            , test "Two non-adjacent like elements should not be grouped together." <|
+                \_ ->
+                    groupWhile (==) (NE.Nonempty 1 [ 1, 2, 3, 1 ])
+                        |> Expect.equal [ [ 1, 1 ], [ 2 ], [ 3 ], [ 1 ] ]
+            ]
+
+
 all : Test
 all =
     describe "All Nonempty List tests"
-        [ testSuite, getSuite, dedupeSuite, uniqSuite ]
+        [ testSuite, getSuite, dedupeSuite, uniqSuite, groupSuite ]
