@@ -35,6 +35,9 @@ To fold or scan from the right, reverse the list first.
 # Sort
 @docs sort, sortBy, sortWith
 
+# Group
+@docs groupWhile
+
 # Deduplicate
 The nonempty list's elements must support equality (e.g. not functions). Otherwise  you will get a runtime error.
 @docs dedup, uniq
@@ -457,3 +460,56 @@ scanl1 f (Nonempty x xs) =
 
         y :: ys ->
             Nonempty x (List.scanl f (f y x) ys)
+
+
+{-| Groups *adjacent* elements together using a passed-in function as the equality test.
+
+Here are some examples of what you can expect:
+
+    groupWhile (\x y -> first x == first y) (Nonempty (0,'a') [(0,'b'),(1,'c'),(1,'d')]) |> toList == [[(0,'a'),(0,'b')],[(1,'c'),(1,'d')]]
+    groupWhile (==) (Nonempty 1 []) toList == [[1]]
+    groupWhile (==) (Nonempty 1 [1]) toList == [[1, 1]]
+    groupWhile (==) (Nonempty 1 [1, 2, 3, 1]) toList == [[1, 1], [2], [3], [1]]
+
+Notice that alike elements are only grouped together when they are adjacent to each other. If you want to group elements together regardless of being adjacent, you can sort the list prior to grouping:
+
+    groupWhile (==) (Nonempty 1 [1, 2, 3, 1]) |> sort |> toList == [[1, 1, 1], [2], [3]]
+
+**Equality testing**
+
+The equality test should be an *equivalent relationship*. Basically...
+
+    f a b == f b a
+
+Otherwise, meaning that if the order of the equality test function arguments affects the output, the weird things can happen:
+
+    groupWhile (<) [1,2,3,2,4,1,3,2,1] == [[1,2,3,2,4],[1,3,2],[1]]
+-}
+groupWhile : (a -> a -> Bool) -> Nonempty a -> Nonempty (Nonempty a)
+groupWhile predicate list =
+    let
+        seed : Nonempty (Nonempty a)
+        seed =
+            head list
+                |> fromElement
+                |> fromElement
+
+        folder : a -> Nonempty (Nonempty a) -> Nonempty (Nonempty a)
+        folder current groups =
+            let
+                group : Nonempty a
+                group =
+                    head groups
+            in
+                if all (predicate current) group then
+                    Nonempty (fromElement current |> append group) (tail groups)
+                else
+                    (fromElement current) ::: groups
+    in
+        case list of
+            Nonempty a [] ->
+                fromElement list
+
+            Nonempty a (x :: xs) ->
+                foldl folder seed (Nonempty x xs)
+                    |> reverse
