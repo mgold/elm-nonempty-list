@@ -358,11 +358,11 @@ groupSuite =
             NE.Nonempty 1 [ 2, 3, 2, 4, 1, 3, 2, 1 ]
     in
         describe "group"
-            [ test "" <|
+            [ test "The tuples should be grouped by their first elements." <|
                 \_ ->
                     groupWhile (\x y -> Tuple.first x == Tuple.first y) xs1
                         |> Expect.equal [ [ ( 0, 'a' ), ( 0, 'b' ) ], [ ( 1, 'c' ), ( 1, 'd' ) ] ]
-            , test "" <|
+            , test "A demonstration of a non-equivalent relations predicate; probably not a useful thing to do." <|
                 \_ ->
                     groupWhile (<) xs2
                         |> Expect.equal [ [ 1 ], [ 2 ], [ 3, 2 ], [ 4, 1 ], [ 3, 2, 1 ] ]
