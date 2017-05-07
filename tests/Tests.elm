@@ -295,16 +295,26 @@ dedupeSuite =
             NE.Nonempty x xs |> NE.dedup |> NE.toList
     in
         describe "deduplication"
-            [ test "" <| \_ -> mk 1 [] |> Expect.equal [ 1 ]
-            , test "" <| \_ -> mk 1 [ 2 ] |> Expect.equal [ 1, 2 ]
-            , test "" <| \_ -> mk 1 [ 2, 2 ] |> Expect.equal [ 1, 2 ]
-            , test "" <| \_ -> mk 1 [ 1, 2 ] |> Expect.equal [ 1, 2 ]
-            , test "" <| \_ -> mk 1 [ 1, 2, 2, 1 ] |> Expect.equal [ 1, 2, 1 ]
-            , test "" <| \_ -> mk 1 [ 1, 2, 2, 2, 2, 2, 1 ] |> Expect.equal [ 1, 2, 1 ]
-            , test "" <| \_ -> mk 1 [ 1, 2, 2, 3, 4, 4, 5 ] |> Expect.equal [ 1, 2, 3, 4, 5 ]
-            , test "" <| \_ -> mk 1 [ 1, 2, 2, 3, 2, 2, 1, 1 ] |> Expect.equal [ 1, 2, 3, 2, 1 ]
-            , test "" <| \_ -> mk 1 (List.range 1 4) |> Expect.equal (List.range 1 4)
-            , test "" <| \_ -> mk 3 (List.range 1 3) |> Expect.equal [ 3, 1, 2, 3 ]
+            [ test "singleton" <|
+                \_ -> mk 1 [] |> Expect.equal [ 1 ]
+            , test "two different elements" <|
+                \_ -> mk 1 [ 2 ] |> Expect.equal [ 1, 2 ]
+            , test "repeated elements on end" <|
+                \_ -> mk 1 [ 2, 2 ] |> Expect.equal [ 1, 2 ]
+            , test "repeated elements at from" <|
+                \_ -> mk 1 [ 1, 2 ] |> Expect.equal [ 1, 2 ]
+            , test "repeated elements at front and in middle" <|
+                \_ -> mk 1 [ 1, 2, 2, 1 ] |> Expect.equal [ 1, 2, 1 ]
+            , test "many repeated inner elements" <|
+                \_ -> mk 1 [ 1, 2, 2, 2, 2, 2, 1 ] |> Expect.equal [ 1, 2, 1 ]
+            , test "some inner repeats, some not" <|
+                \_ -> mk 1 [ 1, 2, 2, 3, 4, 4, 5 ] |> Expect.equal [ 1, 2, 3, 4, 5 ]
+            , test "some inner repeats, some not, with repeat on the end" <|
+                \_ -> mk 1 [ 1, 2, 2, 3, 2, 2, 1, 1 ] |> Expect.equal [ 1, 2, 3, 2, 1 ]
+            , test "a range is already deduplicated" <|
+                \_ -> mk 1 (List.range 1 4) |> Expect.equal (List.range 1 4)
+            , test "first and last elements are the same doesn't change" <|
+                \_ -> mk 3 (List.range 1 3) |> Expect.equal [ 3, 1, 2, 3 ]
             ]
 
 
@@ -314,16 +324,26 @@ uniqSuite =
             NE.Nonempty x xs |> NE.uniq |> NE.toList
     in
         describe "uniq"
-            [ test "" <| \_ -> mk 1 [] |> Expect.equal [ 1 ]
-            , test "" <| \_ -> mk 1 [ 2 ] |> Expect.equal [ 1, 2 ]
-            , test "" <| \_ -> mk 1 [ 2, 2 ] |> Expect.equal [ 1, 2 ]
-            , test "" <| \_ -> mk 1 [ 1, 2 ] |> Expect.equal [ 1, 2 ]
-            , test "" <| \_ -> mk 1 [ 1, 2, 2, 1 ] |> Expect.equal [ 1, 2 ]
-            , test "" <| \_ -> mk 1 [ 1, 2, 2, 2, 2, 2, 1 ] |> Expect.equal [ 1, 2 ]
-            , test "" <| \_ -> mk 1 [ 1, 2, 2, 3, 4, 4, 5 ] |> Expect.equal [ 1, 2, 3, 4, 5 ]
-            , test "" <| \_ -> mk 1 [ 1, 2, 2, 3, 2, 2, 1, 1 ] |> Expect.equal [ 1, 2, 3 ]
-            , test "" <| \_ -> mk 1 (List.range 1 4) |> Expect.equal (List.range 1 4)
-            , test "" <| \_ -> mk 3 (List.range 1 3) |> Expect.equal [ 3, 1, 2 ]
+            [ test "singleton" <|
+                \_ -> mk 1 [] |> Expect.equal [ 1 ]
+            , test "two different elements" <|
+                \_ -> mk 1 [ 2 ] |> Expect.equal [ 1, 2 ]
+            , test "repeated elements on end" <|
+                \_ -> mk 1 [ 2, 2 ] |> Expect.equal [ 1, 2 ]
+            , test "repeated elements at from" <|
+                \_ -> mk 1 [ 1, 2 ] |> Expect.equal [ 1, 2 ]
+            , test "repeated elements at front and in middle" <|
+                \_ -> mk 1 [ 1, 2, 2, 1 ] |> Expect.equal [ 1, 2 ]
+            , test "many repeated inner elements" <|
+                \_ -> mk 1 [ 1, 2, 2, 2, 2, 2, 1 ] |> Expect.equal [ 1, 2 ]
+            , test "some inner repeats, some not" <|
+                \_ -> mk 1 [ 1, 2, 2, 3, 4, 4, 5 ] |> Expect.equal [ 1, 2, 3, 4, 5 ]
+            , test "some inner repeats, some not, with repeat on the end" <|
+                \_ -> mk 1 [ 1, 2, 2, 3, 2, 2, 1, 1 ] |> Expect.equal [ 1, 2, 3 ]
+            , test "a range is already deduplicated" <|
+                \_ -> mk 1 (List.range 1 4) |> Expect.equal (List.range 1 4)
+            , test "first and last elements are the same" <|
+                \_ -> mk 3 (List.range 1 3) |> Expect.equal [ 3, 1, 2 ]
             ]
 
 
@@ -333,18 +353,12 @@ getSuite =
             NE.Nonempty 10 [ 11, 12 ]
     in
         describe "get"
-            [ test "" <| \_ -> NE.get -4 xs |> Expect.equal 12
-            , test "" <| \_ -> NE.get -3 xs |> Expect.equal 10
-            , test "" <| \_ -> NE.get -2 xs |> Expect.equal 11
-            , test "" <| \_ -> NE.get -1 xs |> Expect.equal 12
-            , test "" <| \_ -> NE.get 0 xs |> Expect.equal 10
-            , test "" <| \_ -> NE.get 1 xs |> Expect.equal 11
-            , test "" <| \_ -> NE.get 2 xs |> Expect.equal 12
-            , test "" <| \_ -> NE.get 3 xs |> Expect.equal 10
+            [ test "-4" <| \_ -> NE.get -4 xs |> Expect.equal 12
+            , test "-3" <| \_ -> NE.get -3 xs |> Expect.equal 10
+            , test "-2" <| \_ -> NE.get -2 xs |> Expect.equal 11
+            , test "-1" <| \_ -> NE.get -1 xs |> Expect.equal 12
+            , test "0" <| \_ -> NE.get 0 xs |> Expect.equal 10
+            , test "1" <| \_ -> NE.get 1 xs |> Expect.equal 11
+            , test "2" <| \_ -> NE.get 2 xs |> Expect.equal 12
+            , test "3" <| \_ -> NE.get 3 xs |> Expect.equal 10
             ]
-
-
-all : Test
-all =
-    describe "All Nonempty List tests"
-        [ testSuite, getSuite, dedupeSuite, uniqSuite ]
