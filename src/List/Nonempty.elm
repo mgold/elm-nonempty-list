@@ -3,40 +3,67 @@ module List.Nonempty exposing (..)
 {-| A list that cannot be empty. The head and tail can be accessed without Maybes. Most other list functions are
 available.
 
+
 # Definition
+
 @docs Nonempty
 
+
 # Create
+
 @docs fromElement, fromList
 
+
 # Access
+
 @docs head, tail, toList, get, sample
 
+
 # Inspect
+
 Nonempty lists support equality with the usual `(==)` operator (provided their contents also support equality).
 @docs isSingleton, length, member, all, any
 
+
 # Convert
+
 @docs cons, (:::), append, pop, reverse, concat
 
+
 # Swap
+
 @docs replaceHead, replaceTail, dropTail
 
+
 # Map
+
 @docs map, indexedMap, map2, andMap, concatMap
 
+
 # Filter
+
 @docs filter
 
+
 # Fold
+
 To fold or scan from the right, reverse the list first.
 @docs foldl, foldl1, scanl, scanl1
 
+
+# Zipping
+
+@docs zip, unzip
+
+
 # Sort
+
 @docs sort, sortBy, sortWith
 
+
 # Deduplicate
-The nonempty list's elements must support equality (e.g. not functions). Otherwise  you will get a runtime error.
+
+The nonempty list's elements must support equality (e.g. not functions). Otherwise you will get a runtime error.
 @docs dedup, uniq
 
 -}
@@ -150,7 +177,7 @@ shouldn't matter.
 --infixr 5 :::
 
 
-{-| Append two nonempty lists together. `(++)` is _not_ supported.
+{-| Append two nonempty lists together. `(++)` is *not* supported.
 -}
 append : Nonempty a -> Nonempty a -> Nonempty a
 append (Nonempty x xs) (Nonempty y ys) =
@@ -162,6 +189,7 @@ want to exhaust a list but hang on to the last item indefinitely.
 
     pop (Nonempty 3 [2,1]) == Nonempty 2 [1]
     pop (Nonempty 1 []) == Nonempty 1 []
+
 -}
 pop : Nonempty a -> Nonempty a
 pop (Nonempty x xs) =
@@ -243,6 +271,7 @@ map2 f (Nonempty x xs) (Nonempty y ys) =
 
     map2 (,) xs ys == map (,) xs  |> andMap ys
     head (map (,,) xs |> andMap ys |> andMap zs) == (head xs, head ys, head zs)
+
 -}
 andMap : Nonempty a -> Nonempty (a -> b) -> Nonempty b
 andMap =
@@ -360,9 +389,10 @@ sortWith f (Nonempty x xs) =
             Debug.crash "This can't happen: sortWithing a nonempty list returned an empty list"
 
 
-{-| Remove _adjacent_ duplicate elements from the nonempty list.
+{-| Remove *adjacent* duplicate elements from the nonempty list.
 
     dedup (Nonempty 1 [2, 2, 1]) == Nonempty 1 [2, 1]
+
 -}
 dedup : Nonempty a -> Nonempty a
 dedup (Nonempty x xs) =
@@ -382,9 +412,10 @@ dedup (Nonempty x xs) =
         reverse <| dedupe x [] xs
 
 
-{-| Remove _all_ duplicate elements from the nonempty list, with the remaining elements ordered by first occurrence.
+{-| Remove *all* duplicate elements from the nonempty list, with the remaining elements ordered by first occurrence.
 
     uniq (Nonempty 1 [2, 2, 1]) == Nonempty 1 [2]
+
 -}
 uniq : Nonempty a -> Nonempty a
 uniq (Nonempty x xs) =
@@ -407,14 +438,15 @@ uniq (Nonempty x xs) =
 {-| Reduce a nonempty list from the left with a base case.
 
     foldl (++) "" (Nonempty "a" ["b", "c"]) == "cba"
+
 -}
 foldl : (a -> b -> b) -> b -> Nonempty a -> b
 foldl f b (Nonempty x xs) =
     List.foldl f b (x :: xs)
 
 
-{-| Reduce a nonempty list from the left _without_ a base case. As per Elm convention, the first argument is the current
-element and the second argument is the accumulated value. The function is first invoked on the _second_ element, using
+{-| Reduce a nonempty list from the left *without* a base case. As per Elm convention, the first argument is the current
+element and the second argument is the accumulated value. The function is first invoked on the *second* element, using
 the first element as the accumulated value, except for singleton lists in which has the head is returned.
 
     foldl1 (++) (Nonempty "a" ["b", "c"]) == "cba"
@@ -424,6 +456,7 @@ the first element as the accumulated value, except for singleton lists in which 
     minimizeMe n = abs (n-findMe)
     nearest = foldl1 (\a b -> if minimizeMe a < minimizeMe b then a else b) (Nonempty 10 [20,30,40,50,60])
     nearest == 40
+
 -}
 foldl1 : (a -> a -> a) -> Nonempty a -> a
 foldl1 f (Nonempty x xs) =
@@ -434,6 +467,7 @@ foldl1 f (Nonempty x xs) =
 element. The head of the new nonempty list is always the base case provided, and the length increases by 1.
 
     scanl (++) "" (Nonempty "a" ["b", "c"]) == Nonempty "" ["a","ba","cba"]
+
 -}
 scanl : (a -> b -> b) -> b -> Nonempty a -> Nonempty b
 scanl f b (Nonempty x xs) =
@@ -442,12 +476,13 @@ scanl f b (Nonempty x xs) =
 
 {-| Like `foldl1`, but keep each intermediate value. The head and length are not changed.
 
-This example starts with the number of ways to roll exactly index _i_ on two six-sided dice (the probability density
-function), and turns it into the number of ways to roll at least _i_ (the cumulative density function).
+This example starts with the number of ways to roll exactly index *i* on two six-sided dice (the probability density
+function), and turns it into the number of ways to roll at least *i* (the cumulative density function).
 
     dicePDF = Nonempty 0 [0,1,2,3,4,5,6,5,4,3,2,1]
     diceCDF = scanl1 (+) dicePDF
     diceCDF == Nonempty 0 [0,1,3,6,10,15,21,26,30,33,35,36]
+
 -}
 scanl1 : (a -> a -> a) -> Nonempty a -> Nonempty a
 scanl1 f (Nonempty x xs) =
@@ -457,3 +492,24 @@ scanl1 f (Nonempty x xs) =
 
         y :: ys ->
             Nonempty x (List.scanl f (f y x) ys)
+
+
+{-| Take two nonempty lists and compose them into a nonempty list of corresponding pairs.
+
+The length of the new list equals the length of the smallest list given.
+
+-}
+zip : Nonempty a -> Nonempty b -> Nonempty ( a, b )
+zip (Nonempty x xs) (Nonempty y ys) =
+    Nonempty ( x, y ) (List.map2 (,) xs ys)
+
+
+{-| Decompose a nonempty list of tuples into a tuple of nonempty lists.
+-}
+unzip : Nonempty ( a, b ) -> ( Nonempty a, Nonempty b )
+unzip (Nonempty ( x, y ) rest) =
+    let
+        ( xs, ys ) =
+            List.unzip rest
+    in
+        ( Nonempty x xs, Nonempty y ys )
