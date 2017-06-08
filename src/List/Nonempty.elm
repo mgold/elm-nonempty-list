@@ -51,6 +51,11 @@ To fold or scan from the right, reverse the list first.
 @docs foldl, foldl1, scanl, scanl1
 
 
+# Zipping
+
+@docs zip, unzip
+
+
 # Sort
 
 @docs sort, sortBy, sortWith
@@ -172,7 +177,7 @@ shouldn't matter.
 --infixr 5 :::
 
 
-{-| Append two nonempty lists together. `(++)` is _not_ supported.
+{-| Append two nonempty lists together. `(++)` is *not* supported.
 -}
 append : Nonempty a -> Nonempty a -> Nonempty a
 append (Nonempty x xs) (Nonempty y ys) =
@@ -384,7 +389,7 @@ sortWith f (Nonempty x xs) =
             Debug.crash "This can't happen: sortWithing a nonempty list returned an empty list"
 
 
-{-| Remove _adjacent_ duplicate elements from the nonempty list.
+{-| Remove *adjacent* duplicate elements from the nonempty list.
 
     dedup (Nonempty 1 [2, 2, 1]) == Nonempty 1 [2, 1]
 
@@ -407,7 +412,7 @@ dedup (Nonempty x xs) =
     reverse <| dedupe x [] xs
 
 
-{-| Remove _all_ duplicate elements from the nonempty list, with the remaining elements ordered by first occurrence.
+{-| Remove *all* duplicate elements from the nonempty list, with the remaining elements ordered by first occurrence.
 
     uniq (Nonempty 1 [2, 2, 1]) == Nonempty 1 [2]
 
@@ -440,8 +445,8 @@ foldl f b (Nonempty x xs) =
     List.foldl f b (x :: xs)
 
 
-{-| Reduce a nonempty list from the left _without_ a base case. As per Elm convention, the first argument is the current
-element and the second argument is the accumulated value. The function is first invoked on the _second_ element, using
+{-| Reduce a nonempty list from the left *without* a base case. As per Elm convention, the first argument is the current
+element and the second argument is the accumulated value. The function is first invoked on the *second* element, using
 the first element as the accumulated value, except for singleton lists in which has the head is returned.
 
     foldl1 (++) (Nonempty "a" ["b", "c"]) == "cba"
@@ -471,8 +476,8 @@ scanl f b (Nonempty x xs) =
 
 {-| Like `foldl1`, but keep each intermediate value. The head and length are not changed.
 
-This example starts with the number of ways to roll exactly index _i_ on two six-sided dice (the probability density
-function), and turns it into the number of ways to roll at least _i_ (the cumulative density function).
+This example starts with the number of ways to roll exactly index *i* on two six-sided dice (the probability density
+function), and turns it into the number of ways to roll at least *i* (the cumulative density function).
 
     dicePDF = Nonempty 0 [0,1,2,3,4,5,6,5,4,3,2,1]
     diceCDF = scanl1 (+) dicePDF
@@ -487,3 +492,24 @@ scanl1 f (Nonempty x xs) =
 
         y :: ys ->
             Nonempty x (List.scanl f (f y x) ys)
+
+
+{-| Take two nonempty lists and compose them into a nonempty list of corresponding pairs.
+
+The length of the new list equals the length of the smallest list given.
+
+-}
+zip : Nonempty a -> Nonempty b -> Nonempty ( a, b )
+zip (Nonempty x xs) (Nonempty y ys) =
+    Nonempty ( x, y ) (List.map2 (,) xs ys)
+
+
+{-| Decompose a nonempty list of tuples into a tuple of nonempty lists.
+-}
+unzip : Nonempty ( a, b ) -> ( Nonempty a, Nonempty b )
+unzip (Nonempty ( x, y ) rest) =
+    let
+        ( xs, ys ) =
+            List.unzip rest
+    in
+        ( Nonempty x xs, Nonempty y ys )
