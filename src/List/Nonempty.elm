@@ -125,7 +125,7 @@ get : Int -> Nonempty a -> a
 get i ((Nonempty x xs) as ne) =
     let
         j =
-            i % (length ne)
+            i % length ne
 
         find k ys =
             case ys of
@@ -138,10 +138,10 @@ get i ((Nonempty x xs) as ne) =
                     else
                         find (k - 1) zs
     in
-        if j == 0 then
-            x
-        else
-            find (j - 1) xs
+    if j == 0 then
+        x
+    else
+        find (j - 1) xs
 
 
 {-| Create a random generator that returns a value of the nonempty list chosen uniformly at random.
@@ -215,7 +215,7 @@ reverse (Nonempty x xs) =
                 r :: rss ->
                     revapp ( c :: ls, r, rss )
     in
-        revapp ( [], x, xs )
+    revapp ( [], x, xs )
 
 
 {-| Flatten a nonempty list of nonempty lists into a single nonempty list.
@@ -229,7 +229,7 @@ concat (Nonempty xs xss) =
         tl =
             tail xs ++ List.concat (List.map toList xss)
     in
-        Nonempty hd tl
+    Nonempty hd tl
 
 
 {-| Exchange the head element while leaving the tail alone.
@@ -294,7 +294,7 @@ indexedMap f (Nonempty x xs) =
         wrapped i d =
             f (i + 1) d
     in
-        Nonempty (f 0 x) (List.indexedMap wrapped xs)
+    Nonempty (f 0 x) (List.indexedMap wrapped xs)
 
 
 {-| Determine if the nonempty list has exactly one element.
@@ -345,7 +345,7 @@ filter p d (Nonempty x xs) =
     if p x then
         Nonempty x (List.filter p xs)
     else
-        case (List.filter p xs) of
+        case List.filter p xs of
             [] ->
                 Nonempty d []
 
@@ -409,7 +409,7 @@ dedup (Nonempty x xs) =
                     else
                         dedupe y (prev :: done) ys
     in
-        reverse <| dedupe x [] xs
+    reverse <| dedupe x [] xs
 
 
 {-| Remove *all* duplicate elements from the nonempty list, with the remaining elements ordered by first occurrence.
@@ -432,7 +432,7 @@ uniq (Nonempty x xs) =
                     else
                         unique (y :: seen) (y ::: done) ys
     in
-        reverse <| unique [ x ] (Nonempty x []) xs
+    reverse <| unique [ x ] (Nonempty x []) xs
 
 
 {-| Reduce a nonempty list from the left with a base case.
