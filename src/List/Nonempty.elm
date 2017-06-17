@@ -177,7 +177,7 @@ shouldn't matter.
 --infixr 5 :::
 
 
-{-| Append two nonempty lists together. `(++)` is _not_ supported.
+{-| Append two nonempty lists together. `(++)` is *not* supported.
 -}
 append : Nonempty a -> Nonempty a -> Nonempty a
 append (Nonempty x xs) (Nonempty y ys) =
@@ -187,9 +187,8 @@ append (Nonempty x xs) (Nonempty y ys) =
 {-| Pop and discard the head, or do nothing for a singleton list. Useful if you
 want to exhaust a list but hang on to the last item indefinitely.
 
-    pop (Nonempty 3 [2,1]) --> Nonempty 2 [1]
-
-    pop (Nonempty 1 []) --> Nonempty 1 []
+    pop (Nonempty 3 [2,1]) == Nonempty 2 [1]
+    pop (Nonempty 1 []) == Nonempty 1 []
 
 -}
 pop : Nonempty a -> Nonempty a
@@ -270,7 +269,7 @@ map2 f (Nonempty x xs) (Nonempty y ys) =
 
 {-| Map over an arbitrary number of nonempty lists.
 
-    map2 (,) xs ys == map (,) xs |> andMap ys
+    map2 (,) xs ys == map (,) xs  |> andMap ys
     head (map (,,) xs |> andMap ys |> andMap zs) == (head xs, head ys, head zs)
 
 -}
@@ -337,12 +336,8 @@ any f (Nonempty x xs) =
 provided. If any value is retained, the default value is not used. If you want to deal with a Maybe instead, use
 `toList >> List.filter yourPredicate >> fromList`.
 
-    isEven : Int -> Bool
-    isEven n = n % 2 == 0
-
-    filter isEven 0 (Nonempty 7 [2, 5]) --> fromElement 2
-
-    filter isEven 0 (Nonempty 7 []) --> fromElement 0
+    filter isEven 0 (Nonempty 7 [2, 5]) == fromElement 2
+    filter isEven 0 (Nonempty 7 []) == fromElement 0
 
 -}
 filter : (a -> Bool) -> a -> Nonempty a -> Nonempty a
@@ -394,9 +389,9 @@ sortWith f (Nonempty x xs) =
             Debug.crash "This can't happen: sortWithing a nonempty list returned an empty list"
 
 
-{-| Remove _adjacent_ duplicate elements from the nonempty list.
+{-| Remove *adjacent* duplicate elements from the nonempty list.
 
-    dedup (Nonempty 1 [2, 2, 1]) --> Nonempty 1 [2, 1]
+    dedup (Nonempty 1 [2, 2, 1]) == Nonempty 1 [2, 1]
 
 -}
 dedup : Nonempty a -> Nonempty a
@@ -417,9 +412,9 @@ dedup (Nonempty x xs) =
     reverse <| dedupe x [] xs
 
 
-{-| Remove _all_ duplicate elements from the nonempty list, with the remaining elements ordered by first occurrence.
+{-| Remove *all* duplicate elements from the nonempty list, with the remaining elements ordered by first occurrence.
 
-    uniq (Nonempty 1 [2, 2, 1]) --> Nonempty 1 [2]
+    uniq (Nonempty 1 [2, 2, 1]) == Nonempty 1 [2]
 
 -}
 uniq : Nonempty a -> Nonempty a
@@ -442,7 +437,7 @@ uniq (Nonempty x xs) =
 
 {-| Reduce a nonempty list from the left with a base case.
 
-    foldl (++) "" (Nonempty "a" ["b", "c"]) --> "cba"
+    foldl (++) "" (Nonempty "a" ["b", "c"]) == "cba"
 
 -}
 foldl : (a -> b -> b) -> b -> Nonempty a -> b
@@ -450,24 +445,17 @@ foldl f b (Nonempty x xs) =
     List.foldl f b (x :: xs)
 
 
-{-| Reduce a nonempty list from the left _without_ a base case. As per Elm convention, the first argument is the current
-element and the second argument is the accumulated value. The function is first invoked on the _second_ element, using
+{-| Reduce a nonempty list from the left *without* a base case. As per Elm convention, the first argument is the current
+element and the second argument is the accumulated value. The function is first invoked on the *second* element, using
 the first element as the accumulated value, except for singleton lists in which has the head is returned.
 
-    foldl1 (++) (Nonempty "a" ["b", "c"]) --> "cba"
+    foldl1 (++) (Nonempty "a" ["b", "c"]) == "cba"
+    foldl1 (++) (fromElement "a") == "a"
 
-    foldl1 (++) (fromElement "a") --> "a"
-
-    findMe : Int
     findMe = 42
-
-    minimizeMe : Int -> Int
     minimizeMe n = abs (n-findMe)
-
-    nearest : Int
     nearest = foldl1 (\a b -> if minimizeMe a < minimizeMe b then a else b) (Nonempty 10 [20,30,40,50,60])
-
-    nearest --> 40
+    nearest == 40
 
 -}
 foldl1 : (a -> a -> a) -> Nonempty a -> a
@@ -478,7 +466,7 @@ foldl1 f (Nonempty x xs) =
 {-| Like `foldl`, but keep each intermediate value. For example, scan addition to create the cumulative sum up to each
 element. The head of the new nonempty list is always the base case provided, and the length increases by 1.
 
-    scanl (++) "" (Nonempty "a" ["b", "c"]) --> Nonempty "" ["a","ba","cba"]
+    scanl (++) "" (Nonempty "a" ["b", "c"]) == Nonempty "" ["a","ba","cba"]
 
 -}
 scanl : (a -> b -> b) -> b -> Nonempty a -> Nonempty b
@@ -488,13 +476,12 @@ scanl f b (Nonempty x xs) =
 
 {-| Like `foldl1`, but keep each intermediate value. The head and length are not changed.
 
-This example starts with the number of ways to roll exactly index _i_ on two six-sided dice (the probability density
-function), and turns it into the number of ways to roll at least _i_ (the cumulative density function).
+This example starts with the number of ways to roll exactly index *i* on two six-sided dice (the probability density
+function), and turns it into the number of ways to roll at least *i* (the cumulative density function).
 
-    dicePDF : Nonempty Int
     dicePDF = Nonempty 0 [0,1,2,3,4,5,6,5,4,3,2,1]
-
-    scanl1 (+) dicePDF --> Nonempty 0 [0,1,3,6,10,15,21,26,30,33,35,36]
+    diceCDF = scanl1 (+) dicePDF
+    diceCDF == Nonempty 0 [0,1,3,6,10,15,21,26,30,33,35,36]
 
 -}
 scanl1 : (a -> a -> a) -> Nonempty a -> Nonempty a
@@ -525,4 +512,4 @@ unzip (Nonempty ( x, y ) rest) =
         ( xs, ys ) =
             List.unzip rest
     in
-    ( Nonempty x xs, Nonempty y ys )
+        ( Nonempty x xs, Nonempty y ys )
