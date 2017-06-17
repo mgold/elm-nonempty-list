@@ -5,15 +5,26 @@ A list that is known, at compile-time, to be nonempty. This means `head` and `ta
 
 ````elm
 import List.Nonempty exposing (..)
+
+one : Nonempty Int
 one = fromElement 2
+
+two : Nonempty Int
 two = 4 ::: one
-toList two == [4, 2]
-head two == 4
-tail two == [2]
-toList (reverse two) == [2, 4]
-toList (dropTail two) == [4]
-member 4 two == True
-foldl1 (+) two == 6
+
+toList two --> [4, 2]
+
+head two --> 4
+
+tail two --> [2]
+
+toList (reverse two) --> [2, 4]
+
+toList (dropTail two) --> [4]
+
+member 4 two --> True
+
+foldl1 (+) two --> 6
 ````
 
 For actual usage, I recommend `import List.Nonempty as NE exposing (Nonempty, (:::))` to import the type and infix cons.
@@ -21,7 +32,8 @@ For actual usage, I recommend `import List.Nonempty as NE exposing (Nonempty, (:
 ## Testing
 ```
 npm install -g elm-test
-elm test # From project root. Will require downloading packages on the first run.
+npm install -g elm-verify-examples
+elm verify-examples && elm test # From project root. Will require downloading packages on the first run.
 ```
 
 ## Upgrading
