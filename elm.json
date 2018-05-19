@@ -1,0 +1,16 @@
+{
+    "type": "package",
+    "name": "mgold/elm-nonempty-list",
+    "summary": "head and tail without the Maybe",
+    "license": "BSD-3-Clause",
+    "version": "3.1.0",
+    "exposed-modules": [
+        "List.Nonempty"
+    ],
+    "elm-version": "0.19.0 <= v < 0.20.0",
+    "dependencies": {
+        "elm-lang/core": "6.0.0 <= v < 7.0.0",
+        "elm-lang/random": "1.0.0 <= v < 2.0.0"
+    },
+    "test-dependencies": {}
+}

@@ -1,4 +1,4 @@
-module List.Nonempty exposing ((:::), Nonempty(..), all, andMap, any, append, concat, concatMap, cons, dedup, dropTail, filter, foldl, foldl1, fromElement, fromList, get, head, indexedMap, isSingleton, length, map, map2, member, pop, replaceHead, replaceTail, reverse, sample, scanl, scanl1, sort, sortBy, sortWith, tail, toList, uniq, unzip, zip)
+module List.Nonempty exposing (Nonempty(..), all, andMap, any, append, concat, concatMap, cons, dedup, dropTail, filter, foldl, foldl1, fromElement, fromList, get, head, indexedMap, isSingleton, length, map, map2, member, pop, replaceHead, replaceTail, reverse, sample, sort, sortBy, sortWith, tail, toList, uniq, unzip, zip)
 
 {-| A list that cannot be empty. The head and tail can be accessed without Maybes. Most other list functions are
 available.
@@ -28,7 +28,7 @@ Nonempty lists support equality with the usual `(==)` operator (provided their c
 
 # Convert
 
-@docs cons, (:::), append, pop, reverse, concat
+@docs cons, append, pop, reverse, concat
 
 
 # Swap
@@ -50,7 +50,7 @@ Nonempty lists support equality with the usual `(==)` operator (provided their c
 
 To fold or scan from the right, reverse the list first.
 
-@docs foldl, foldl1, scanl, scanl1
+@docs foldl, foldl1
 
 
 # Zipping
@@ -128,7 +128,7 @@ get : Int -> Nonempty a -> a
 get i ((Nonempty x xs) as ne) =
     let
         j =
-            i % length ne
+            modBy (length ne) i
 
         find k ys =
             case ys of
@@ -165,24 +165,6 @@ sample nonempty =
 cons : a -> Nonempty a -> Nonempty a
 cons y (Nonempty x xs) =
     Nonempty y (x :: xs)
-
-
-{-| Infix cons. Note that you cannot use this for pattern matching. Be sure to add `exposing ((:::))` to your import.
-
-    4 ::: Nonempty 3 [2,1] == Nonempty 4 [3,2,1]
-
-Note: the infix associativity and precedence are not set for this operator, because doing so can cause
-[conflicts](https://github.com/elm-lang/elm-compiler/issues/1096) that are hard to work around. In most cases this
-shouldn't matter.
-
--}
-(:::) : a -> Nonempty a -> Nonempty a
-(:::) =
-    cons
-
-
-
---infixr 5 :::
 
 
 {-| Append two nonempty lists together. `(++)` is _not_ supported.
@@ -445,7 +427,7 @@ uniq (Nonempty x xs) =
                         unique seen done ys
 
                     else
-                        unique (y :: seen) (y ::: done) ys
+                        unique (y :: seen) (cons y done) ys
     in
     reverse <| unique [ x ] (Nonempty x []) xs
 
@@ -485,38 +467,6 @@ foldl1 f (Nonempty x xs) =
     List.foldl f x xs
 
 
-{-| Like `foldl`, but keep each intermediate value. For example, scan addition to create the cumulative sum up to each
-element. The head of the new nonempty list is always the base case provided, and the length increases by 1.
-
-    scanl (++) "" (Nonempty "a" ["b", "c"]) --> Nonempty "" ["a","ba","cba"]
-
--}
-scanl : (a -> b -> b) -> b -> Nonempty a -> Nonempty b
-scanl f b (Nonempty x xs) =
-    Nonempty b <| List.scanl f (f x b) xs
-
-
-{-| Like `foldl1`, but keep each intermediate value. The head and length are not changed.
-
-This example starts with the number of ways to roll exactly index _i_ on two six-sided dice (the probability density
-function), and turns it into the number of ways to roll at least _i_ (the cumulative density function).
-
-    dicePDF : Nonempty Int
-    dicePDF = Nonempty 0 [0,1,2,3,4,5,6,5,4,3,2,1]
-
-    scanl1 (+) dicePDF --> Nonempty 0 [0,1,3,6,10,15,21,26,30,33,35,36]
-
--}
-scanl1 : (a -> a -> a) -> Nonempty a -> Nonempty a
-scanl1 f (Nonempty x xs) =
-    case xs of
-        [] ->
-            Nonempty x []
-
-        y :: ys ->
-            Nonempty x (List.scanl f (f y x) ys)
-
-
 {-| Take two nonempty lists and compose them into a nonempty list of corresponding pairs.
 
 The length of the new list equals the length of the smallest list given.
@@ -524,7 +474,7 @@ The length of the new list equals the length of the smallest list given.
 -}
 zip : Nonempty a -> Nonempty b -> Nonempty ( a, b )
 zip (Nonempty x xs) (Nonempty y ys) =
-    Nonempty ( x, y ) (List.map2 (,) xs ys)
+    Nonempty ( x, y ) (List.map2 Tuple.pair xs ys)
 
 
 {-| Decompose a nonempty list of tuples into a tuple of nonempty lists.
