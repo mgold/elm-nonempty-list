@@ -1,4 +1,4 @@
-module List.Nonempty exposing (..)
+module List.Nonempty exposing ((:::), Nonempty(..), all, andMap, any, append, concat, concatMap, cons, dedup, dropTail, filter, foldl, foldl1, fromElement, fromList, get, head, indexedMap, isSingleton, length, map, map2, member, pop, replaceHead, replaceTail, reverse, sample, scanl, scanl1, sort, sortBy, sortWith, tail, toList, uniq, unzip, zip)
 
 {-| A list that cannot be empty. The head and tail can be accessed without Maybes. Most other list functions are
 available.
@@ -22,6 +22,7 @@ available.
 # Inspect
 
 Nonempty lists support equality with the usual `(==)` operator (provided their contents also support equality).
+
 @docs isSingleton, length, member, all, any
 
 
@@ -48,6 +49,7 @@ Nonempty lists support equality with the usual `(==)` operator (provided their c
 # Fold
 
 To fold or scan from the right, reverse the list first.
+
 @docs foldl, foldl1, scanl, scanl1
 
 
@@ -64,6 +66,7 @@ To fold or scan from the right, reverse the list first.
 # Deduplicate
 
 The nonempty list's elements must support equality (e.g. not functions). Otherwise you will get a runtime error.
+
 @docs dedup, uniq
 
 -}
@@ -130,16 +133,21 @@ get i ((Nonempty x xs) as ne) =
         find k ys =
             case ys of
                 [] ->
-                    Debug.crash "This can't happen: attempted to take value at safe index from empty list"
+                    {- This should never happen, but to avoid Debug.crash,
+                       we return the head of the list.
+                    -}
+                    x
 
                 z :: zs ->
                     if k == 0 then
                         z
+
                     else
                         find (k - 1) zs
     in
     if j == 0 then
         x
+
     else
         find (j - 1) xs
 
@@ -349,6 +357,7 @@ filter : (a -> Bool) -> a -> Nonempty a -> Nonempty a
 filter p d (Nonempty x xs) =
     if p x then
         Nonempty x (List.filter p xs)
+
     else
         case List.filter p xs of
             [] ->
@@ -358,40 +367,39 @@ filter p d (Nonempty x xs) =
                 Nonempty y ys
 
 
+insertWith : (a -> a -> Order) -> a -> List a -> Nonempty a
+insertWith cmp hd aList =
+    case aList of
+        x :: xs ->
+            if cmp x hd == LT then
+                Nonempty x <| toList (insertWith cmp hd xs)
+
+            else
+                Nonempty hd aList
+
+        [] ->
+            Nonempty hd []
+
+
 {-| Sort a nonempty list of comparable things, lowest to highest.
 -}
 sort : Nonempty comparable -> Nonempty comparable
 sort (Nonempty x xs) =
-    case List.sort (x :: xs) of
-        y :: ys ->
-            Nonempty y ys
-
-        [] ->
-            Debug.crash "This can't happen: sorting a nonempty list returned an empty list"
+    insertWith compare x <| List.sort xs
 
 
 {-| Sort a nonempty list of things by a derived property.
 -}
 sortBy : (a -> comparable) -> Nonempty a -> Nonempty a
 sortBy f (Nonempty x xs) =
-    case List.sortBy f (x :: xs) of
-        y :: ys ->
-            Nonempty y ys
-
-        [] ->
-            Debug.crash "This can't happen: sortBying a nonempty list returned an empty list"
+    insertWith (\a b -> compare (f a) (f b)) x <| List.sortBy f xs
 
 
 {-| Sort a nonempty list of things by a custom comparison function.
 -}
 sortWith : (a -> a -> Order) -> Nonempty a -> Nonempty a
 sortWith f (Nonempty x xs) =
-    case List.sortWith f (x :: xs) of
-        y :: ys ->
-            Nonempty y ys
-
-        [] ->
-            Debug.crash "This can't happen: sortWithing a nonempty list returned an empty list"
+    insertWith f x <| List.sortWith f xs
 
 
 {-| Remove _adjacent_ duplicate elements from the nonempty list.
@@ -411,6 +419,7 @@ dedup (Nonempty x xs) =
                 y :: ys ->
                     if y == prev then
                         dedupe prev done ys
+
                     else
                         dedupe y (prev :: done) ys
     in
@@ -434,6 +443,7 @@ uniq (Nonempty x xs) =
                 y :: ys ->
                     if List.member y seen then
                         unique seen done ys
+
                     else
                         unique (y :: seen) (y ::: done) ys
     in
