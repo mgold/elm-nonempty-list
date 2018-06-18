@@ -328,7 +328,7 @@ provided. If any value is retained, the default value is not used. If you want t
 `toList >> List.filter yourPredicate >> fromList`.
 
     isEven : Int -> Bool
-    isEven n = n % 2 == 0
+    isEven n = modBy 2 n == 0
 
     filter isEven 0 (Nonempty 7 [2, 5]) --> fromElement 2
 

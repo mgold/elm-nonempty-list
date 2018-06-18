@@ -2,7 +2,7 @@ module Tests exposing (..)
 
 import Expect
 import Fuzz exposing (char, int, list, string, tuple, tuple3)
-import List.Nonempty as NE exposing ((:::))
+import List.Nonempty as NE
 import Random
 import String
 import Task exposing (Task)
@@ -14,11 +14,15 @@ nonemptylist elem =
 
 
 isEven n =
-    n % 2 == 0
+    modBy 2 n == 0
 
 
 f x =
     x * 2
+
+
+uncurry g ( x, y ) =
+    g x y
 
 
 testSuite =
@@ -33,7 +37,7 @@ testSuite =
             \( x, xs ) -> NE.Nonempty x xs |> NE.length |> Expect.equal (List.length xs + 1)
         , fuzz2 int (nonemptylist int) "cons works" <|
             \y ( x, xs ) ->
-                y ::: NE.Nonempty x xs |> NE.toList |> Expect.equal (y :: x :: xs)
+                NE.cons y (NE.Nonempty x xs) |> NE.toList |> Expect.equal (y :: x :: xs)
         , fuzz int "fromElement results in a singleton" <|
             \x -> NE.fromElement x |> NE.isSingleton |> Expect.true "fromElement x not a singleton"
         , fuzz (tuple ( nonemptylist int, nonemptylist int )) "append works" <|
@@ -73,39 +77,39 @@ testSuite =
                     |> NE.map f
                     |> NE.toList
                     |> Expect.equal (List.map f (x :: xs))
-        , fuzz (tuple ( nonemptylist int, nonemptylist string )) "length (map2 (,) xs ys) == min (length xs) (length ys)" <|
+        , fuzz (tuple ( nonemptylist int, nonemptylist string )) "length (map2 Tuple.pair xs ys) == min (length xs) (length ys)" <|
             \( ( x, xs ), ( y, ys ) ) ->
-                NE.length (NE.map2 (,) (NE.Nonempty x xs) (NE.Nonempty y ys))
+                NE.length (NE.map2 Tuple.pair (NE.Nonempty x xs) (NE.Nonempty y ys))
                     |> Expect.equal (1 + min (List.length xs) (List.length ys))
         , fuzz (tuple ( nonemptylist int, nonemptylist string ))
-            "map2 (,) xs ys == map (,) xs  |> andMap ys"
+            "map2 Tuple.pair xs ys == map Tuple.pair xs  |> andMap ys"
           <|
             \( ( x, xs ), ( y, ys ) ) ->
                 let
                     expected =
-                        NE.map2 (,) (NE.Nonempty x xs) (NE.Nonempty y ys)
+                        NE.map2 Tuple.pair (NE.Nonempty x xs) (NE.Nonempty y ys)
 
                     actual =
-                        NE.map (,) (NE.Nonempty x xs) |> NE.andMap (NE.Nonempty y ys)
+                        NE.map Tuple.pair (NE.Nonempty x xs) |> NE.andMap (NE.Nonempty y ys)
                 in
                 Expect.equal expected actual
         , fuzz3 (nonemptylist int) (nonemptylist string) (nonemptylist char) "head (map (,,) xs |> andMap ys |> andMap zs) == (head xs, head ys, head zs)" <|
             \( x, xs ) ( y, ys ) ( z, zs ) ->
-                NE.map (,,) (NE.Nonempty x xs)
+                NE.map (\a b c -> ( a, b, c )) (NE.Nonempty x xs)
                     |> NE.andMap (NE.Nonempty y ys)
                     |> NE.andMap (NE.Nonempty z zs)
                     |> NE.head
                     |> Expect.equal ( x, y, z )
         , fuzz (nonemptylist int) "concatMap works the same as for a list" <|
             \( x, xs ) ->
-                NE.concatMap (\x -> NE.Nonempty x [ f x ]) (NE.Nonempty x xs)
+                NE.concatMap (\y -> NE.Nonempty y [ f y ]) (NE.Nonempty x xs)
                     |> NE.toList
-                    |> Expect.equal (List.concatMap (\x -> [ x, f x ]) (x :: xs))
+                    |> Expect.equal (List.concatMap (\y -> [ y, f y ]) (x :: xs))
         , fuzz (nonemptylist int) "indexedMap works the same as for a list" <|
             \( x, xs ) ->
-                NE.indexedMap (,) (NE.Nonempty x xs)
+                NE.indexedMap Tuple.pair (NE.Nonempty x xs)
                     |> NE.toList
-                    |> Expect.equal (List.indexedMap (,) (x :: xs))
+                    |> Expect.equal (List.indexedMap Tuple.pair (x :: xs))
         , fuzz (nonemptylist int) "filter works" <|
             \( x, xs ) ->
                 NE.Nonempty x xs
@@ -118,6 +122,7 @@ testSuite =
                          in
                          if List.isEmpty filtered then
                             [ -99 ]
+
                          else
                             filtered
                         )
@@ -228,64 +233,6 @@ testSuite =
                     |> NE.sortWith compare
                     |> NE.toList
                     |> Expect.equal (List.sortWith compare (x :: xs))
-        , describe "scanning"
-            [ fuzz (nonemptylist string) "scanl is the same as for a list" <|
-                \( x, xs ) ->
-                    NE.Nonempty x xs
-                        |> NE.scanl (++) ""
-                        |> NE.toList
-                        |> Expect.equal (List.scanl (++) "" (x :: xs))
-            , fuzz (nonemptylist string) "The head of the result of scanl is the base case" <|
-                \( x, xs ) ->
-                    NE.Nonempty x xs
-                        |> NE.scanl (++) ""
-                        |> NE.head
-                        |> Expect.equal ""
-            , fuzz (nonemptylist string) "The tail of the result of scanl is the result of scanl1" <|
-                \( x, xs ) ->
-                    let
-                        ys =
-                            NE.Nonempty x xs
-
-                        scanned =
-                            NE.scanl (++) "" ys
-
-                        scanned1 =
-                            NE.scanl1 (++) ys
-                    in
-                    NE.tail scanned
-                        |> Expect.equal (NE.toList scanned1)
-            , fuzz (nonemptylist int) "scanl adds 1 to the length" <|
-                \( x, xs ) ->
-                    NE.Nonempty x xs
-                        |> NE.scanl (+) 0
-                        |> NE.length
-                        |> Expect.equal (2 + List.length xs)
-            , fuzz (nonemptylist int) "scanl1 does not change the length" <|
-                \( x, xs ) ->
-                    NE.Nonempty x xs
-                        |> NE.scanl1 (+)
-                        |> NE.length
-                        |> Expect.equal (1 + List.length xs)
-            , fuzz (nonemptylist string) "scanl with string concatenation never decreases the length" <|
-                \( x, xs ) ->
-                    let
-                        counts =
-                            NE.Nonempty x xs
-                                |> NE.scanl1 (++)
-                                |> NE.map String.length
-                    in
-                    List.map2 (,) (NE.toList counts) (NE.tail counts)
-                        |> List.map (\( a, b ) -> a <= b)
-                        |> List.all identity
-                        |> Expect.true "length decreased at least once"
-            , fuzz (nonemptylist string) "scanl1 does not change the head" <|
-                \( x, xs ) ->
-                    NE.Nonempty x xs
-                        |> NE.scanl1 (++)
-                        |> NE.head
-                        |> Expect.equal x
-            ]
         ]
 
 
