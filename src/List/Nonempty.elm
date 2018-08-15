@@ -478,6 +478,12 @@ zip (Nonempty x xs) (Nonempty y ys) =
 
 
 {-| Decompose a nonempty list of tuples into a tuple of nonempty lists.
+
+    batters : Nonempty (String, Int)
+    batters = Nonempty ("Barry Bonds", 762) [("Hank Aaron", 755), ("Babe Ruth", 714)]
+
+    unzip batters --> (Nonempty "Barry Bonds" ["Hank Aaron", "Babe Ruth"], Nonempty 762 [755, 714])
+
 -}
 unzip : Nonempty ( a, b ) -> ( Nonempty a, Nonempty b )
 unzip (Nonempty ( x, y ) rest) =

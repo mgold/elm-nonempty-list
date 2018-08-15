@@ -43,7 +43,7 @@ elm verify-examples && elm test # From project root. Will require downloading pa
 
 ## Upgrading
 
-4.0.0 removed the following functions: `(:::)`, `scanl`, and `scanl1`.
+4.0.0, for Elm 0.19, removed the following functions: `(:::)`, `scanl`, and `scanl1`. `sample` uses the new [PRNG](https://en.m.wikipedia.org/wiki/Pseudorandom_number_generator) found in `elm-lang/random`.
 
 The only breaking change from 2.x to 3.0.0 is that `andMap` has arguments
 reversed to allow chaining with `|>` instead of backticks.
