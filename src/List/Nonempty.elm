@@ -1,4 +1,4 @@
-module List.Nonempty exposing (Nonempty(..), all, andMap, any, append, concat, concatMap, cons, dedup, dropTail, filter, foldl, foldl1, fromElement, fromList, get, head, indexedMap, isSingleton, length, map, map2, member, pop, replaceHead, replaceTail, reverse, sample, sort, sortBy, sortWith, tail, toList, uniq, unzip, zip)
+module List.Nonempty exposing (Nonempty(..), all, andMap, any, append, concat, concatMap, cons, dedup, dropTail, filter, foldl, foldl1, fromElement, fromList, fromListWithDefault, get, head, indexedMap, isSingleton, length, map, map2, member, pop, replaceHead, replaceTail, reverse, sample, sort, sortBy, sortWith, tail, toList, uniq, unzip, zip)
 
 {-| A list that cannot be empty. The head and tail can be accessed without Maybes. Most other list functions are
 available.
@@ -11,7 +11,7 @@ available.
 
 # Create
 
-@docs fromElement, fromList
+@docs fromElement, fromList, fromListWithDefault
 
 
 # Access
@@ -98,6 +98,19 @@ fromList ys =
 
         _ ->
             Nothing
+
+
+{-| Create a nonempty list from an ordinary list, using the provided default
+value to ensure non-emptiness.
+-}
+fromListWithDefault : List a -> a -> Nonempty a
+fromListWithDefault ys default =
+    case ys of
+        [] ->
+            Nonempty default []
+
+        x :: xs ->
+            Nonempty x xs
 
 
 {-| Return the head of the list.
