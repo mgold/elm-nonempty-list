@@ -1,4 +1,4 @@
-module Tests exposing (..)
+module Tests exposing (dedupeSuite, f, fromListWithDefaultSuite, getSuite, isEven, nonemptylist, testSuite, uncurry, uniqSuite)
 
 import Expect
 import Fuzz exposing (char, int, list, string, tuple, tuple3)
@@ -308,4 +308,25 @@ getSuite =
         , test "1" <| \_ -> NE.get 1 xs |> Expect.equal 11
         , test "2" <| \_ -> NE.get 2 xs |> Expect.equal 12
         , test "3" <| \_ -> NE.get 3 xs |> Expect.equal 10
+        ]
+
+
+fromListWithDefaultSuite =
+    describe "fromListWithDefault"
+        [ fuzz int "Empty list returns default" <|
+            \default ->
+                NE.fromListWithDefault [] default
+                    |> NE.toList
+                    |> Expect.equal [ default ]
+
+        -- 👇 list fuzzer doesn't work here because it generates `[]`
+        , test "Non-empthy list comes through unaltered" <|
+            \_ ->
+                let
+                    list =
+                        [ 3.14159265359, 2.7182818284, 42 ]
+                in
+                NE.fromListWithDefault list 0
+                    |> NE.toList
+                    |> Expect.equal list
         ]

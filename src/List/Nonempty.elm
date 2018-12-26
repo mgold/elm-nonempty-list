@@ -1,4 +1,17 @@
-module List.Nonempty exposing (Nonempty(..), all, andMap, any, append, concat, concatMap, cons, dedup, dropTail, filter, foldl, foldl1, fromElement, fromList, get, head, indexedMap, isSingleton, length, map, map2, member, pop, replaceHead, replaceTail, reverse, sample, sort, sortBy, sortWith, tail, toList, uniq, unzip, zip)
+module List.Nonempty exposing
+    ( Nonempty(..)
+    , fromElement, fromList, fromListWithDefault
+    , head, tail, toList, get, sample
+    , isSingleton, length, member, all, any
+    , cons, append, pop, reverse, concat
+    , replaceHead, replaceTail, dropTail
+    , map, indexedMap, map2, andMap, concatMap
+    , filter
+    , foldl, foldl1
+    , zip, unzip
+    , sort, sortBy, sortWith
+    , dedup, uniq
+    )
 
 {-| A list that cannot be empty. The head and tail can be accessed without Maybes. Most other list functions are
 available.
@@ -11,7 +24,7 @@ available.
 
 # Create
 
-@docs fromElement, fromList
+@docs fromElement, fromList, fromListWithDefault
 
 
 # Access
@@ -100,6 +113,19 @@ fromList ys =
             Nothing
 
 
+{-| Create a nonempty list from an ordinary list, using the provided default
+value to ensure non-emptiness.
+-}
+fromListWithDefault : List a -> a -> Nonempty a
+fromListWithDefault ys default =
+    case ys of
+        [] ->
+            Nonempty default []
+
+        x :: xs ->
+            Nonempty x xs
+
+
 {-| Return the head of the list.
 -}
 head : Nonempty a -> a
@@ -177,7 +203,7 @@ append (Nonempty x xs) (Nonempty y ys) =
 {-| Pop and discard the head, or do nothing for a singleton list. Useful if you
 want to exhaust a list but hang on to the last item indefinitely.
 
-    pop (Nonempty 3 [2,1]) --> Nonempty 2 [1]
+    pop (Nonempty 3 [ 2, 1 ]) --> Nonempty 2 [1]
 
     pop (Nonempty 1 []) --> Nonempty 1 []
 
@@ -261,7 +287,8 @@ map2 f (Nonempty x xs) (Nonempty y ys) =
 {-| Map over an arbitrary number of nonempty lists.
 
     map2 (,) xs ys == map (,) xs |> andMap ys
-    head (map (,,) xs |> andMap ys |> andMap zs) == (head xs, head ys, head zs)
+
+    head (map (,,) xs |> andMap ys |> andMap zs) == ( head xs, head ys, head zs )
 
 -}
 andMap : Nonempty a -> Nonempty (a -> b) -> Nonempty b
@@ -386,7 +413,7 @@ sortWith f (Nonempty x xs) =
 
 {-| Remove _adjacent_ duplicate elements from the nonempty list.
 
-    dedup (Nonempty 1 [2, 2, 1]) --> Nonempty 1 [2, 1]
+    dedup (Nonempty 1 [ 2, 2, 1 ]) --> Nonempty 1 [2, 1]
 
 -}
 dedup : Nonempty a -> Nonempty a
@@ -410,7 +437,7 @@ dedup (Nonempty x xs) =
 
 {-| Remove _all_ duplicate elements from the nonempty list, with the remaining elements ordered by first occurrence.
 
-    uniq (Nonempty 1 [2, 2, 1]) --> Nonempty 1 [2]
+    uniq (Nonempty 1 [ 2, 2, 1 ]) --> Nonempty 1 [2]
 
 -}
 uniq : Nonempty a -> Nonempty a
@@ -434,7 +461,7 @@ uniq (Nonempty x xs) =
 
 {-| Reduce a nonempty list from the left with a base case.
 
-    foldl (++) "" (Nonempty "a" ["b", "c"]) --> "cba"
+    foldl (++) "" (Nonempty "a" [ "b", "c" ]) --> "cba"
 
 -}
 foldl : (a -> b -> b) -> b -> Nonempty a -> b
