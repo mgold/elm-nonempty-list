@@ -13,7 +13,7 @@ one : Nonempty Int
 one = fromElement 2
 
 two : Nonempty Int
-two = 4 ::: one
+two = cons 4 one
 
 toList two --> [4, 2]
 
@@ -30,8 +30,8 @@ member 4 two --> True
 foldl1 (+) two --> 6
 ```
 
-For actual usage, I recommend `import List.Nonempty as NE exposing (Nonempty,
-(:::))` to import the type and infix cons.
+For actual usage, I recommend `import List.Nonempty as NE exposing (Nonempty)`
+to just import the type.
 
 ## Testing
 
