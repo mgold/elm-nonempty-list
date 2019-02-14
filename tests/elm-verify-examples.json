@@ -1,6 +1,7 @@
 {
   "root": "../src",
   "tests": [
-    "List.Nonempty"
+    "List.Nonempty",
+    "./README.md"
   ]
 }
