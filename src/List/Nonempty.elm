@@ -1,4 +1,17 @@
-module List.Nonempty exposing (Nonempty(..), all, andMap, any, append, concat, concatMap, cons, dedup, dropTail, filter, foldl, foldl1, fromElement, fromList, get, head, indexedMap, isSingleton, length, map, map2, member, pop, replaceHead, replaceTail, reverse, sample, sort, sortBy, sortWith, tail, toList, uniq, unzip, zip)
+module List.Nonempty exposing
+    ( Nonempty(..)
+    , fromElement, fromList
+    , head, tail, toList, get, sample
+    , isSingleton, length, member, all, any
+    , cons, append, pop, reverse, concat
+    , replaceHead, replaceTail, dropTail
+    , map, indexedMap, map2, andMap, concatMap
+    , filter
+    , foldl, foldl1
+    , zip, unzip
+    , sort, sortBy, sortWith
+    , dedup, uniq
+    )
 
 {-| A list that cannot be empty. The head and tail can be accessed without Maybes. Most other list functions are
 available.
@@ -177,7 +190,7 @@ append (Nonempty x xs) (Nonempty y ys) =
 {-| Pop and discard the head, or do nothing for a singleton list. Useful if you
 want to exhaust a list but hang on to the last item indefinitely.
 
-    pop (Nonempty 3 [2,1]) --> Nonempty 2 [1]
+    pop (Nonempty 3 [ 2, 1 ]) --> Nonempty 2 [1]
 
     pop (Nonempty 1 []) --> Nonempty 1 []
 
@@ -261,7 +274,8 @@ map2 f (Nonempty x xs) (Nonempty y ys) =
 {-| Map over an arbitrary number of nonempty lists.
 
     map2 (,) xs ys == map (,) xs |> andMap ys
-    head (map (,,) xs |> andMap ys |> andMap zs) == (head xs, head ys, head zs)
+
+    head (map (,,) xs |> andMap ys |> andMap zs) == ( head xs, head ys, head zs )
 
 -}
 andMap : Nonempty a -> Nonempty (a -> b) -> Nonempty b
@@ -354,7 +368,7 @@ insertWith cmp hd aList =
     case aList of
         x :: xs ->
             if cmp x hd == LT then
-                Nonempty x <| toList (insertWith cmp hd xs)
+                Nonempty x (List.sortWith cmp (hd :: xs))
 
             else
                 Nonempty hd aList
@@ -367,14 +381,14 @@ insertWith cmp hd aList =
 -}
 sort : Nonempty comparable -> Nonempty comparable
 sort (Nonempty x xs) =
-    insertWith compare x <| List.sort xs
+    insertWith compare x (List.sort xs)
 
 
 {-| Sort a nonempty list of things by a derived property.
 -}
 sortBy : (a -> comparable) -> Nonempty a -> Nonempty a
 sortBy f (Nonempty x xs) =
-    insertWith (\a b -> compare (f a) (f b)) x <| List.sortBy f xs
+    insertWith (\a b -> compare (f a) (f b)) x (List.sortBy f xs)
 
 
 {-| Sort a nonempty list of things by a custom comparison function.
@@ -386,7 +400,7 @@ sortWith f (Nonempty x xs) =
 
 {-| Remove _adjacent_ duplicate elements from the nonempty list.
 
-    dedup (Nonempty 1 [2, 2, 1]) --> Nonempty 1 [2, 1]
+    dedup (Nonempty 1 [ 2, 2, 1 ]) --> Nonempty 1 [2, 1]
 
 -}
 dedup : Nonempty a -> Nonempty a
@@ -410,7 +424,7 @@ dedup (Nonempty x xs) =
 
 {-| Remove _all_ duplicate elements from the nonempty list, with the remaining elements ordered by first occurrence.
 
-    uniq (Nonempty 1 [2, 2, 1]) --> Nonempty 1 [2]
+    uniq (Nonempty 1 [ 2, 2, 1 ]) --> Nonempty 1 [2]
 
 -}
 uniq : Nonempty a -> Nonempty a
@@ -434,7 +448,7 @@ uniq (Nonempty x xs) =
 
 {-| Reduce a nonempty list from the left with a base case.
 
-    foldl (++) "" (Nonempty "a" ["b", "c"]) --> "cba"
+    foldl (++) "" (Nonempty "a" [ "b", "c" ]) --> "cba"
 
 -}
 foldl : (a -> b -> b) -> b -> Nonempty a -> b
