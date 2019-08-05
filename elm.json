@@ -3,7 +3,7 @@
     "name": "mgold/elm-nonempty-list",
     "summary": "head and tail without the Maybe",
     "license": "BSD-3-Clause",
-    "version": "4.0.1",
+    "version": "4.0.2",
     "exposed-modules": [
         "List.Nonempty"
     ],
