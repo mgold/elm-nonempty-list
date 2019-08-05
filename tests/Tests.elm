@@ -1,4 +1,4 @@
-module Tests exposing (..)
+module Tests exposing (dedupeSuite, f, getSuite, isEven, nonemptylist, sizeSuite, testSuite, uncurry, uniqSuite)
 
 import Expect
 import Fuzz exposing (char, int, list, string, tuple, tuple3)
@@ -308,4 +308,16 @@ getSuite =
         , test "1" <| \_ -> NE.get 1 xs |> Expect.equal 11
         , test "2" <| \_ -> NE.get 2 xs |> Expect.equal 12
         , test "3" <| \_ -> NE.get 3 xs |> Expect.equal 10
+        ]
+
+
+sizeSuite =
+    describe "test large lists"
+        [ test "500,001 items" <|
+            \_ ->
+                let
+                    testNumberData =
+                        NE.Nonempty 1 (List.repeat 50000 [ -1, 2, -1, 2, 4, 5, 6, -1, 2, -1 ] |> List.concat)
+                in
+                Expect.equal (NE.length testNumberData) (NE.length (NE.sort testNumberData))
         ]
