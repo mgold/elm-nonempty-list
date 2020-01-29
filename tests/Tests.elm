@@ -1,4 +1,4 @@
-module Tests exposing (dedupeSuite, f, getSuite, isEven, nonemptylist, sizeSuite, testSuite, uncurry, uniqSuite)
+module Tests exposing (dedupeSuite, f, getSuite, isEven, lastSuite, nonemptylist, sizeSuite, testSuite, uncurry, uniqSuite)
 
 import Expect
 import Fuzz exposing (char, int, list, string, tuple, tuple3)
@@ -308,6 +308,14 @@ getSuite =
         , test "1" <| \_ -> NE.get 1 xs |> Expect.equal 11
         , test "2" <| \_ -> NE.get 2 xs |> Expect.equal 12
         , test "3" <| \_ -> NE.get 3 xs |> Expect.equal 10
+        ]
+
+
+lastSuite =
+    describe "last"
+        [ test "one element" <| \_ -> NE.Nonempty 12 [] |> NE.last |> Expect.equal 12
+        , test "two elements" <| \_ -> NE.Nonempty 12 [ 13 ] |> NE.last |> Expect.equal 13
+        , test "many elements" <| \_ -> NE.Nonempty 12 [ 13, 14, 14, 15, 16, 17 ] |> NE.last |> Expect.equal 17
         ]
 
 
