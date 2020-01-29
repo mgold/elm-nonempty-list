@@ -1,7 +1,7 @@
 module List.Nonempty exposing
     ( Nonempty(..)
     , fromElement, fromList
-    , head, tail, toList, get, sample
+    , head, tail, toList, get, last, sample
     , isSingleton, length, member, all, any
     , cons, append, pop, reverse, concat
     , replaceHead, replaceTail, dropTail
@@ -29,7 +29,7 @@ available.
 
 # Access
 
-@docs head, tail, toList, get, sample
+@docs head, tail, toList, get, last, sample
 
 
 # Inspect
@@ -163,6 +163,21 @@ get i ((Nonempty x xs) as ne) =
 
     else
         find (j - 1) xs
+
+
+{-| Return the last element of the list.
+-}
+last : Nonempty a -> a
+last (Nonempty x xs) =
+    case xs of
+        [] ->
+            x
+
+        [ y ] ->
+            y
+
+        _ :: rest ->
+            last (Nonempty x rest)
 
 
 {-| Create a random generator that returns a value of the nonempty list chosen uniformly at random.
