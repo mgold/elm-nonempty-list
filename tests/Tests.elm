@@ -233,6 +233,23 @@ testSuite =
                     |> NE.sortWith compare
                     |> NE.toList
                     |> Expect.equal (List.sortWith compare (x :: xs))
+        , fuzz2 int (nonemptylist string) "take is same as for list if result is nonempty, else just first element" <|
+            \n ( x, xs ) ->
+                let
+                    listResult =
+                        List.take n (x :: xs)
+
+                    expectedResult =
+                        case listResult of
+                            [] ->
+                                [ x ]
+
+                            y ->
+                                y
+                in
+                NE.take n (NE.Nonempty x xs)
+                    |> NE.toList
+                    |> Expect.equalLists expectedResult
         ]
 
 
