@@ -1,7 +1,7 @@
 module List.Nonempty exposing
     ( Nonempty(..)
     , fromElement, fromList
-    , head, tail, toList, get, last, sample
+    , head, tail, toList, get, last, take, sample
     , isSingleton, length, member, all, any
     , cons, append, pop, reverse, concat
     , replaceHead, replaceTail, dropTail
@@ -29,7 +29,7 @@ available.
 
 # Access
 
-@docs head, tail, toList, get, last, sample
+@docs head, tail, toList, get, last, take, sample
 
 
 # Inspect
@@ -178,6 +178,20 @@ last (Nonempty x xs) =
 
         _ :: rest ->
             last (Nonempty x rest)
+
+
+{-| Create a nonempty list consisting of the first n elements. If n < 1, returns a nonempty list consiting of just the first element
+
+    take 2 (Nonempty 1 [ 2, 3 ]) --> Nonempty 1 [ 2 ]
+
+    take 0 (Nonempty 1 [ 2, 3 ]) --> fromElement 1
+
+    take -3 (Nonempty 1 [ 2, 3 ]) --> fromElement 1
+
+-}
+take : Int -> Nonempty a -> Nonempty a
+take n (Nonempty x xs) =
+    Nonempty x (List.take (n - 1) xs)
 
 
 {-| Create a random generator that returns a value of the nonempty list chosen uniformly at random.
