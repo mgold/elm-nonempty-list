@@ -1,6 +1,6 @@
 module List.Nonempty exposing
     ( Nonempty(..)
-    , fromElement, fromList
+    , singleton, fromList
     , head, tail, toList, get, last, take, sample
     , isSingleton, length, member, all, any
     , cons, append, pop, reverse, concat
@@ -11,6 +11,7 @@ module List.Nonempty exposing
     , zip, unzip
     , sort, sortBy, sortWith
     , dedup, uniq
+    , fromElement
     )
 
 {-| A list that cannot be empty. The head and tail can be accessed without Maybes. Most other list functions are
@@ -24,7 +25,7 @@ available.
 
 # Create
 
-@docs fromElement, fromList
+@docs singleton, fromList
 
 
 # Access
@@ -82,6 +83,11 @@ The nonempty list's elements must support equality (e.g. not functions). Otherwi
 
 @docs dedup, uniq
 
+
+# Deprecated
+
+@docs fromElement
+
 -}
 
 import Random
@@ -96,9 +102,16 @@ type Nonempty a
 
 {-| Create a singleton list with the given element.
 -}
-fromElement : a -> Nonempty a
-fromElement x =
+singleton : a -> Nonempty a
+singleton x =
     Nonempty x []
+
+
+{-| Create a singleton list with the given element. Deprecated in favor of `singleton`, which is what elm-lang/core uses.
+-}
+fromElement : a -> Nonempty a
+fromElement =
+    singleton
 
 
 {-| Create a nonempty list from an ordinary list, failing on the empty list.
